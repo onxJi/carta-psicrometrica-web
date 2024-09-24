@@ -7,7 +7,7 @@ import { Component, ElementRef, viewChild } from '@angular/core';
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
   host: {
-    class: "bg-white border-gray-200 dark:bg-gray-900"
+    class: "border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
   }
 })
 export class NavbarComponent {
@@ -15,6 +15,6 @@ export class NavbarComponent {
   public contentValue = viewChild<ElementRef<HTMLDivElement>>('navbarCta');
 
   abrirMenu() {
-    this.contentValue()?.nativeElement
+    this.contentValue()?.nativeElement.classList.toggle('hidden');
   }
 }
