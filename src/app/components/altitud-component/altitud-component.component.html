@@ -1,3 +1,29 @@
-<div class="border shadow-sm">
-    <p-button label="Click"></p-button>
+<p-panel [toggleable]="true" header="Altitud" [collapsed]="true">
+    <h2>Ingrese el valor de la altitud <span>(msnm)</span> para realizar la
+        carta psicrómetrica.</h2>
+
+    <hr />
+    <form style="margin-top: 2rem;" [formGroup]="formAlt">
+        <p-floatLabel>
+            <input pInputText id="altitud" name="altitud" formControlName="altitud" class="border" />
+            <label for="altitud">Altitud</label>
+        </p-floatLabel>
+    </form>
+
+</p-panel>
+
+<div style="margin-top: 1rem;">
+<p-panel [toggleable]="true" header="Diferentes Puntos" [collapsed]="true">
+    <h2>Ingrese el valor de la altitud <span>(msnm)</span> para realizar la
+        carta psicrómetrica.</h2>
+
+    <hr />
+    <form style="margin-top: 2rem;" [formGroup]="formAlt">
+        <p-floatLabel>
+            <input pInputText id="altitud" name="altitud" formControlName="altitud" class="border" />
+            <label for="altitud">Altitud</label>
+        </p-floatLabel>
+    </form>
+
+</p-panel>
 </div>

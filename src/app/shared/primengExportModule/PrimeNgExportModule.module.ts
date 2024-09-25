@@ -26,8 +26,9 @@ import { TriStateCheckboxModule } from 'primeng/tristatecheckbox';
 import { DividerModule } from 'primeng/divider';
 import { ToastModule } from 'primeng/toast';
 import { SelectButtonModule } from 'primeng/selectbutton';
-
-
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { PanelModule } from 'primeng/panel';
+import { ChartModule } from 'primeng/chart';
 @NgModule({
     declarations: [],
     imports: [],
@@ -58,7 +59,11 @@ import { SelectButtonModule } from 'primeng/selectbutton';
         TriStateCheckboxModule,
         DividerModule,
         ToastModule,
-        SelectButtonModule]
+        SelectButtonModule,
+        FloatLabelModule,
+        PanelModule,
+        ChartModule
+        ]
 })
-export class PrimeNgExportModuleModule {
+export class PrimeNgExportModule {
 }
