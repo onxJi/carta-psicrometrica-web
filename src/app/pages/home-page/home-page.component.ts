@@ -1,10 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
+import { AltitudComponentComponent } from '../../components/altitud-component/altitud-component.component';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [],
+  imports: [AltitudComponentComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css'
 })
