@@ -10,12 +10,14 @@ import { BrowserModule } from '@angular/platform-browser';
   imports: [PrimeNgExportModule, ReactiveFormsModule],
   templateUrl: './altitud-component.component.html',
   styleUrl: './altitud-component.component.css',
-
+  host:{
+    style: 'width: 100%'
+  }
 })
 export class AltitudComponentComponent {
 
   formAlt = this.fb.group({
-    altitud: ['', Validators.required]
+    altitud: [0, Validators.required]
   })
 
   constructor(

@@ -2,13 +2,18 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { AltitudComponentComponent } from '../../components/altitud-component/altitud-component.component';
 import { PrimeNgExportModule } from '../../shared/primengExportModule/PrimeNgExportModule.module';
+import { style } from '@angular/animations';
+import { GraficaComponent } from '../../components/grafica/grafica.component';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [AltitudComponentComponent, PrimeNgExportModule],
+  imports: [AltitudComponentComponent, PrimeNgExportModule, GraficaComponent],
   templateUrl: './home-page.component.html',
-  styleUrl: './home-page.component.css'
+  styleUrl: './home-page.component.css',
+  host: {
+    style: "width: 100%"
+  }
 })
 export default class HomePageComponent implements OnInit {
 
@@ -37,62 +42,7 @@ export default class HomePageComponent implements OnInit {
 
 
 
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
-    const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
-    const dataw = [{ x: 'Jan', net: 100, cogs: 50, gm: 50 }, { x: 'Feb', net: 120, cogs: 55, gm: 75 }];
-    this.data = {
-      labels: [-10,0,10,20,30,40,50,60],
-      datasets: [
-        {
-          label: 'First Dataset',
-          data: dataw, // Line 2
-          fill: false,
-          borderColor: documentStyle.getPropertyValue('--blue-500'),
-          tension: 0.4
-        },
-        {
-          label: 'Second Dataset',
-          data: [28, 48, 40, 19, 86, 27, 90],
-          fill: false,
-          borderColor: documentStyle.getPropertyValue('--pink-500'),
-          tension: 0.4
-        }
-      ]
-    };
-
-    this.options = {
-      maintainAspectRatio: false,
-      aspectRatio: 0.6,
-      plugins: {
-        legend: {
-          labels: {
-            color: textColor
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: {
-            color: textColorSecondary
-          },
-          grid: {
-            color: surfaceBorder,
-            drawBorder: false
-          }
-        },
-        y: {
-          ticks: {
-            color: textColorSecondary
-          },
-          grid: {
-            color: surfaceBorder,
-            drawBorder: false
-          }
-        }
-      }
-    };
+    
   }
 
 }
