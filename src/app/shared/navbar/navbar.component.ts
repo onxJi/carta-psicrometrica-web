@@ -1,21 +1,48 @@
-import { Component, ElementRef, viewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, viewChild } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
+import { MenuItem } from 'primeng/api/menuitem';
+import { PrimeNgExportModule } from '../primengExportModule/PrimeNgExportModule.module';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, PrimeNgExportModule, CommonModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
   host: {
 
   }
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
 
-  public contentValue = viewChild<ElementRef<HTMLDivElement>>('navbarCta');
+  items: MenuItem[] | undefined;
+  menuOpen = false;
 
-  abrirMenu() {
-    this.contentValue()?.nativeElement.classList.toggle('hidden');
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
   }
+
+  ngOnInit(): void {
+    this.items = [
+      {
+        label: 'Home',
+        icon: 'pi pi-home',
+        routerLink: 'home'
+      },
+      {
+        label: 'About',
+        icon: 'pi pi-star',
+        routerLink: 'about'
+      },
+      {
+        label: 'Contact',
+        icon: 'pi pi-envelope',
+        routerLink: 'contact'
+      }
+    ]
+  }
+
+
+
 }

@@ -1,0 +1,35 @@
+.card-grafica {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  /* Añadir un borde para separar el contenido del entorno */
+  border-radius: 5px;
+  /* Añadir esquinas redondeadas para un aspecto más suave */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: fit-content;
+  padding: 1rem;
+}
+
+.container-home {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem; /* Espacio entre los componentes */
+  width: 100%;
+}
+
+/* Estilos para pantallas grandes (como laptops) */
+@media (min-width: 768px) {
+  .container-home {
+    flex-direction: row; /* Los componentes se alinean en fila */
+  }
+}
+
+/* Estilos para pantallas pequeñas (como móviles) */
+@media (max-width: 768px) {
+  .container-home {
+    flex-direction: column; /* Los componentes se alinean en columna */
+    align-items: center; /* Centra los componentes en pantalla */
+  }
+}

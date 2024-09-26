@@ -29,6 +29,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { PanelModule } from 'primeng/panel';
 import { ChartModule } from 'primeng/chart';
+import { MenubarModule } from 'primeng/menubar';
 @NgModule({
     declarations: [],
     imports: [],
@@ -62,8 +63,9 @@ import { ChartModule } from 'primeng/chart';
         SelectButtonModule,
         FloatLabelModule,
         PanelModule,
-        ChartModule
-        ]
+        ChartModule,
+        MenubarModule
+    ]
 })
 export class PrimeNgExportModule {
 }

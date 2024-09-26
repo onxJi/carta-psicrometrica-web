@@ -9,7 +9,8 @@ import { BrowserModule } from '@angular/platform-browser';
   standalone: true,
   imports: [PrimeNgExportModule, ReactiveFormsModule],
   templateUrl: './altitud-component.component.html',
-  styleUrl: './altitud-component.component.css'
+  styleUrl: './altitud-component.component.css',
+
 })
 export class AltitudComponentComponent {
 
@@ -19,5 +20,5 @@ export class AltitudComponentComponent {
 
   constructor(
     private fb: FormBuilder
-  ){}
+  ) { }
 }
