@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { PrimeNgExportModule } from '../../shared/primengExportModule/PrimeNgExportModule.module';
 import { style } from '@angular/animations';
+import { AltitudeService } from '../../services/altitud-service/altitudeService.service';
+import { Ecuations } from '../../shared/maths/Ecuaciones.ecuation';
 
 @Component({
   selector: 'app-grafica',
@@ -16,32 +18,34 @@ export class GraficaComponent implements OnInit {
 
 
   data: any;
-
+  ecuations = new Ecuations();
   options: any;
+  datasets = signal<any[]>([]);
+  altitudValue = signal(0);
+  tbs_range = Array.from({ length: 15 }, (_, i) => i * 5 - 10);
+  hr_range = Array.from({ length: 11 }, (_, i) => i * 10);
+  constructor(
+    private altitudService: AltitudeService
+  ) { }
+
   ngOnInit(): void {
+
+    this.altitudService.altitude$.subscribe(altitud => {
+      const altitudValue = altitud ?? 0;
+      this.altitudValue.set(altitudValue);
+      // Limpiar el datasets antes de calcular la gráfica
+      this.datasets.set([]); // Limpiar datasets
+
+      this.calcularGrafica(); // Llamar a la función para calcular los nuevos datos
+    });
+
     const documentStyle = getComputedStyle(document.documentElement);
     const textColor = documentStyle.getPropertyValue('--text-color');
     const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
     const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
-    //const dataw = [{ x: 'Jan', net: 100, cogs: 50, gm: 50 }, { x: 'Feb', net: 120, cogs: 55, gm: 75 }];
     this.data = {
-      labels: [-10, 0, 10, 20, 30, 40, 50, 60],
-      datasets: [
-        {
-          label: 'First Dataset',
-          data: [1.2,30,23,30,45,50], // Line 2
-          fill: false,
-          borderColor: documentStyle.getPropertyValue('--blue-500'),
-          tension: 0.4
-        },
-        {
-          label: 'Second Dataset',
-          data: [28, 48, 40, 19, 86, 27, 90],
-          fill: false,
-          borderColor: documentStyle.getPropertyValue('--pink-500'),
-          tension: 0.4
-        }
-      ]
+      labels: this.tbs_range,
+      datasets: this.datasets()
     };
 
     this.options = {
@@ -51,7 +55,8 @@ export class GraficaComponent implements OnInit {
         legend: {
           labels: {
             color: textColor
-          }
+          },
+          display: false
         }
       },
       scales: {
@@ -97,4 +102,43 @@ export class GraficaComponent implements OnInit {
     };
   }
 
+
+  calcularGrafica() {
+    const alt = this.altitudValue();
+    let data: any[] = [];
+    const documentStyle = getComputedStyle(document.documentElement);
+
+
+    this.hr_range.forEach(hr => {
+      this.tbs_range.forEach(tbs => {
+        const result_ = this.ecuations.main(tbs, hr, alt);
+
+      });
+    });
+
+    this.tbs_range.forEach(tbs => {
+      const { pv, W, U, Tbh, Tr, Veh, h, pvs, Ws } = this.ecuations.main(tbs, 100, alt);
+      console.log({ pv, W, U, Tbh, Tr, Veh, h, pvs, Ws });
+      this.datasets().push({
+        label: `Tbs = ${tbs}`,  // Etiqueta para identificar cada serie
+        data: [
+          {
+            x: tbs,  // Usamos 'tbs' para el eje X
+            y: 0     // Iniciamos en y = 0
+          },
+          {
+            x: tbs,  // Usamos 'tbs' para el eje X (mismo valor)
+            y: Ws    // Aquí definimos el valor de y correspondiente a 'Ws' (similar a Python)
+          }
+        ],
+        showLine: true,  // Muestra líneas en lugar de puntos sueltos
+        fill: false,     // No rellenamos debajo de la línea
+        backgroundColor: 'rgb(255, 0, 0)',  // Color de los puntos o línea
+        borderColor: 'rgb(255, 0, 0)',      // Color de la línea
+        borderWidth: 2,    // Grosor de la línea
+        yAxisID: 'y1'      // Definimos el eje Y que queremos usar
+      });
+    });
+
+  }
 }

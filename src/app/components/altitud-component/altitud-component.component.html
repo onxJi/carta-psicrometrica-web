@@ -10,6 +10,9 @@
         </p-floatLabel>
     </form>
 
+    <p-button label="Calcular" [outlined]="true" [style]="{ padding: '0.25rem', marginTop: '1rem', marginLeft: 'auto' }"
+        (onClick)="calcular()" [disabled]="formAlt.invalid" />
+
 </p-panel>
 
 <div style="margin-top: 1rem;">
