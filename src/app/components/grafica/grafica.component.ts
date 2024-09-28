@@ -36,7 +36,7 @@ export class GraficaComponent implements OnInit {
       // Limpiar el datasets antes de calcular la gráfica
       this.datasets = []; // Limpiar datasets
 
-      this.calcularGrafica(); 
+      this.calcularGrafica();
       this.calculoLineasTbh();
       this.calculoLineasHumedad();
     });
@@ -148,21 +148,37 @@ export class GraficaComponent implements OnInit {
 
 
   calculoLineasHumedad() {
-    const results_by_hr: { [key: number]: any[] } = {};
-    let W_range: any = {};
-    const Tbh_range: { [key: number]: number[] } = {};
+    let W_range: { [key: number]: { x: number, y: number }[] } = {};
 
     this.hr_range.forEach(hr => {
-
+      // Inicializar el array de la clave hr si no existe
+      if (!W_range[hr]) {
+        W_range[hr] = [];
+      }
       this.tbs_range.forEach(tbs => {
-        const { W} = this.ecuations.main(tbs, hr, this.altitudValue());
-        
-        W_range[hr].push(W);
-        console.log(W_range)
+        const { W } = this.ecuations.main(tbs, hr, this.altitudValue());
+        // Agregar el punto { x: tbs, y: W } al array correspondiente
+        W_range[hr].push({ x: tbs, y: W });
       });
     });
 
-    
+    // Generar los datasets para la gráfica
+    Object.keys(W_range).forEach(hrStr => {
+      const hr = Number(hrStr);  // Convertir la clave a número
+      const dataPoints = W_range[hr];  // Los puntos para este valor de hr
+
+      // Crear un dataset para cada valor de hr
+      this.datasets.push({
+        label: `HR = ${hr}`,  // Etiqueta para identificar cada serie
+        data: dataPoints,  // Puntos x, y para graficar
+        showLine: true,  // Muestra las líneas conectando los puntos
+        backgroundColor: 'rgba(255, 100, 0, 0.5)',  // Color de fondo de los puntos
+        borderColor: 'rgb(255, 100, 0)',  // Color de la línea
+        borderWidth: 1,  // Grosor de la línea
+        yAxisID: 'y1'  // Eje Y a usar
+      });
+    });
+
   }
 
   calculoLineasTbh() {
@@ -170,18 +186,18 @@ export class GraficaComponent implements OnInit {
 
     this.tbs_range.forEach((tbs) => {
       const result_ = this.ecuations.main(tbs, 100, this.altitudValue());
-      const lambdaV = this.ecuations.lamba_v(tbs); 
+      const lambdaV = this.ecuations.lamba_v(tbs);
       const Yas = result_.Ws;
       //tbhRange.push({ tbs, Yas, tg: (((lambdaV / 0.227) * Yas) + tbs), Ya: 0 });
       const tg = (((lambdaV / 0.227) * Yas) + tbs);
       this.datasets.push({
-          label: `Tbh = ${result_.Tbh}`,  // Etiqueta para identificar cada serie
-          data: [{ x: tg, y: 0 }, { x: tbs, y: Yas }],
-          showLine: true,  // Muestra líneas en lugar de puntos sueltos
-          backgroundColor: 'rgb(255, 100, 0)',  // Color de los puntos o línea
-          borderColor: 'rgb(255, 100, 0)',      // Color de la línea
-          borderWidth: 1,    // Grosor de la línea
-          yAxisID: 'y1'      // Definimos el eje Y que queremos usar
+        label: `Tbh = ${result_.Tbh}`,  // Etiqueta para identificar cada serie
+        data: [{ x: tg, y: 0 }, { x: tbs, y: Yas }],
+        showLine: true,  // Muestra líneas en lugar de puntos sueltos
+        backgroundColor: 'rgb(255, 100, 0)',  // Color de los puntos o línea
+        borderColor: 'rgb(255, 100, 0)',      // Color de la línea
+        borderWidth: 1,    // Grosor de la línea
+        yAxisID: 'y1'      // Definimos el eje Y que queremos usar
       })
     });
     console.log(this.datasets)
