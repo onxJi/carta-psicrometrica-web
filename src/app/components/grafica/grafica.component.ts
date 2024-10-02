@@ -24,12 +24,16 @@ export class GraficaComponent implements OnInit {
   // Tabla
   headers = [
     { header: 'Tbs', field: 'tbs' },
+    { header: 'HR %', field: 'hr' },
     { header: 'Tbh', field: 'Tbh' },
+    { header: 'Tr', field: 'Tr' },
     { header: 'Veh', field: 'Veh' },
     { header: 'h', field: 'h' },
     { header: 'U', field: 'U' },
-    { header: 'Humedad Relativa', field: 'hr' },
     { header: 'Ws', field: 'Ws' },
+    { header: 'W', field: 'W' },
+    { header: 'Pv', field: 'pv' },
+    { header: 'Pvs', field: 'pvs' }
   ];
   data = signal({});
   ecuations = new Ecuations();
@@ -127,7 +131,7 @@ export class GraficaComponent implements OnInit {
             text: 'Razón de humedad (Kg/Kg)'
           },
           min: 0,
-          max: 0.04
+          max: 0.08
         },
         y2: {
           display: false,
@@ -135,7 +139,7 @@ export class GraficaComponent implements OnInit {
           position: 'right',
           type: 'linear',
           min: 0,
-          max: 0.04,
+          max: 0.08,
         },
       }
     };
@@ -257,7 +261,7 @@ export class GraficaComponent implements OnInit {
       ...currentDatasets,
       {
         label: `Punto (${data.tbs}, ${data.hr})`,
-        data: [{ x: +data.tbs, y: result.Ws }],
+        data: [{ x: +data.tbs, y: result.W }],
         showLine: false,
         backgroundColor: 'rgb(0, 255, 0)',
         borderColor: 'rgb(0, 255, 0)',
