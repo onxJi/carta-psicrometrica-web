@@ -17,16 +17,24 @@
 
 <div style="margin-top: 1rem;">
     <p-panel [toggleable]="true" header="Diferentes Puntos" [collapsed]="true" [style]="{width: '300px'}">
-        <h2>Ingrese el valor de la altitud <span>(msnm)</span> para realizar la
-            carta psicrómetrica.</h2>
+        <h2 style="font-size: 12px;">Ingrese el valor de la temperatura de bulbo seco y humedad relativa para calcular
+            los datos.</h2>
 
         <hr />
-        <form style="margin-top: 2rem;" [formGroup]="formAlt">
+        <form [formGroup]="formPoints" class="formPoints">
             <p-floatLabel>
-                <input pInputText id="altitud" name="altitud" formControlName="altitud" class="border" />
-                <label for="altitud">Altitud</label>
+                <input pInputText id="tbs" name="tbs" formControlName="tbs" class="border" />
+                <label for="tbs">Temperatura Bulbo Seco °C</label>
+            </p-floatLabel>
+            <p-floatLabel>
+                <input pInputText id="hr" name="hr" formControlName="hr" class="border" />
+                <label for="hr">Humedad Relativa %</label>
             </p-floatLabel>
         </form>
+
+        <p-button label="Agregar" [outlined]="true"
+            [style]="{ padding: '0.25rem', marginTop: '1rem', marginLeft: 'auto' }" (onClick)="calcularPuntos()"
+            [disabled]="formPoints.invalid" />
 
     </p-panel>
 </div>

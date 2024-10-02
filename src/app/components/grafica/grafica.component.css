@@ -9,10 +9,12 @@
   /* Añadir esquinas redondeadas para un aspecto más suave */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 1rem;
+  width: 100%; /* Ajusta el ancho al 100% del contenedor padre */
+  max-width: 100%;
 }
 
-@media (max-width: 600px){
-    .card-grafica {
-        width: 310px;
-    }
+@media (max-width: 600px) {
+  .card-grafica {
+    width: 90vw;
+  }
 }

@@ -1,3 +1,15 @@
 .panel {
   border: solid 1px #9a9a9a;
 }
+
+.formPoints {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1rem;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 2rem;
+}

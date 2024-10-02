@@ -42,7 +42,7 @@ export default class HomePageComponent implements OnInit {
 
 
 
-    
+
   }
 
 }

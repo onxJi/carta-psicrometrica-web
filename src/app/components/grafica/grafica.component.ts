@@ -1,54 +1,80 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, viewChild } from '@angular/core';
 import { PrimeNgExportModule } from '../../shared/primengExportModule/PrimeNgExportModule.module';
 import { style } from '@angular/animations';
+import { Chart } from 'chart.js';
 import { AltitudeService } from '../../services/altitud-service/altitudeService.service';
 import { Ecuations } from '../../shared/maths/Ecuaciones.ecuation';
+import { PsychrometricData } from '../../models/entities/PsychrometricData.model';
+import { CustomTableComponent } from '../../shared/custom-table/custom-table.component';
+import { PointsService } from '../../services/points.service';
 
 @Component({
   selector: 'app-grafica',
   standalone: true,
-  imports: [PrimeNgExportModule],
+  imports: [PrimeNgExportModule, CustomTableComponent],
   templateUrl: './grafica.component.html',
   styleUrl: './grafica.component.css',
   host: {
-    style: 'width: 100%'
+    style: 'width: 100%; max-width: 100%; overflow: hidden;'
   }
 })
 export class GraficaComponent implements OnInit {
 
-
-  data: any;
+  pointsData = signal<PsychrometricData[]>([]);
+  // Tabla
+  headers = [
+    { header: 'Tbs', field: 'tbs' },
+    { header: 'Tbh', field: 'Tbh' },
+    { header: 'Veh', field: 'Veh' },
+    { header: 'h', field: 'h' },
+    { header: 'U', field: 'U' },
+    { header: 'Humedad Relativa', field: 'hr' },
+    { header: 'Ws', field: 'Ws' },
+  ];
+  data = signal({});
   ecuations = new Ecuations();
   options: any;
-  datasets: any[] = [];
+  datasets = signal<any[]>([]);
   altitudValue = signal(0);
   tbs_range = Array.from({ length: 15 }, (_, i) => i * 5 - 10);
   hr_range = Array.from({ length: 11 }, (_, i) => i * 10);
   constructor(
-    private altitudService: AltitudeService
+    private altitudService: AltitudeService,
+    private pointService: PointsService
   ) { }
 
   ngOnInit(): void {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--text-color');
+    const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
+    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
+    this.data.set({
+      labels: this.tbs_range,
+      datasets: this.datasets
+    });
 
     this.altitudService.altitude$.subscribe(altitud => {
       const altitudValue = altitud ?? 0;
       this.altitudValue.set(altitudValue);
       // Limpiar el datasets antes de calcular la gráfica
-      this.datasets = []; // Limpiar datasets
+      this.datasets.set([]); // Limpiar datasets
 
       this.calcularGrafica();
       this.calculoLineasTbh();
       this.calculoLineasHumedad();
+
+      // Actualizar la data con los nuevos datasets
+      this.data.update(currentData => ({
+        ...currentData,
+        datasets: this.datasets()
+      }));
     });
 
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
-    const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
-    this.data = {
-      labels: this.tbs_range,
-      datasets: this.datasets
-    };
+    this.pointService.formData$.subscribe(points => {
+      if (points) {
+        this.calcularPuntos(points);
+      }
+    });
 
     this.options = {
       type: 'line',
@@ -56,7 +82,7 @@ export class GraficaComponent implements OnInit {
       aspectRatio: 0.6,
       elements: {
         point: {
-          radius: 0.5
+          radius: 1
         }
       },
       plugins: {
@@ -122,26 +148,24 @@ export class GraficaComponent implements OnInit {
     const documentStyle = getComputedStyle(document.documentElement);
 
     this.tbs_range.forEach(tbs => {
-      const { pv, W, U, Tbh, Tr, Veh, h, pvs, Ws } = this.ecuations.main(tbs, 100, alt);
-      this.datasets.push({
-        label: `Tbs = ${tbs}`,  // Etiqueta para identificar cada serie
-        data: [
-          {
-            x: tbs,  // Usamos 'tbs' para el eje X
-            y: 0     // Iniciamos en y = 0
-          },
-          {
-            x: tbs,  // Usamos 'tbs' para el eje X (mismo valor)
-            y: Ws    // Aquí definimos el valor de y correspondiente a 'Ws' (similar a Python)
-          }
-        ],
-        showLine: true,  // Muestra líneas en lugar de puntos sueltos
-        fill: false,     // No rellenamos debajo de la línea
-        backgroundColor: 'rgb(255, 0, 0)',  // Color de los puntos o línea
-        borderColor: 'rgb(255, 0, 0)',      // Color de la línea
-        borderWidth: 2,    // Grosor de la línea
-        yAxisID: 'y1'      // Definimos el eje Y que queremos usar
-      });
+      const { Ws } = this.ecuations.main(tbs, 100, alt);
+      // Usar `update` para modificar el valor de `datasets`
+      this.datasets.update(currentDatasets => [
+        ...currentDatasets,
+        {
+          label: `Tbs = ${tbs}`,  // Etiqueta para identificar cada serie
+          data: [
+            { x: tbs, y: 0 },  // Iniciamos en y = 0
+            { x: tbs, y: Ws }  // Definimos el valor de y correspondiente a 'Ws'
+          ],
+          showLine: true,
+          fill: false,
+          backgroundColor: 'rgb(255, 0, 0)',
+          borderColor: 'rgb(255, 0, 0)',
+          borderWidth: 2,
+          yAxisID: 'y1'
+        }
+      ]);
     });
 
   }
@@ -164,19 +188,21 @@ export class GraficaComponent implements OnInit {
 
     // Generar los datasets para la gráfica
     Object.keys(W_range).forEach(hrStr => {
-      const hr = Number(hrStr);  // Convertir la clave a número
-      const dataPoints = W_range[hr];  // Los puntos para este valor de hr
+      const hr = Number(hrStr);
+      const dataPoints = W_range[hr];
 
-      // Crear un dataset para cada valor de hr
-      this.datasets.push({
-        label: `HR = ${hr}`,  // Etiqueta para identificar cada serie
-        data: dataPoints,  // Puntos x, y para graficar
-        showLine: true,  // Muestra las líneas conectando los puntos
-        backgroundColor: 'rgba(255, 100, 0, 0.5)',  // Color de fondo de los puntos
-        borderColor: 'rgb(255, 100, 0)',  // Color de la línea
-        borderWidth: 1,  // Grosor de la línea
-        yAxisID: 'y1'  // Eje Y a usar
-      });
+      this.datasets.update(currentDatasets => [
+        ...currentDatasets,
+        {
+          label: `HR = ${hr}`,
+          data: dataPoints,
+          showLine: true,
+          backgroundColor: 'rgba(255, 100, 0, 0.5)',
+          borderColor: 'rgb(255, 100, 0)',
+          borderWidth: 1,
+          yAxisID: 'y1'
+        }
+      ]);
     });
 
   }
@@ -190,16 +216,64 @@ export class GraficaComponent implements OnInit {
       const Yas = result_.Ws;
       //tbhRange.push({ tbs, Yas, tg: (((lambdaV / 0.227) * Yas) + tbs), Ya: 0 });
       const tg = (((lambdaV / 0.227) * Yas) + tbs);
-      this.datasets.push({
-        label: `Tbh = ${result_.Tbh}`,  // Etiqueta para identificar cada serie
-        data: [{ x: tg, y: 0 }, { x: tbs, y: Yas }],
-        showLine: true,  // Muestra líneas en lugar de puntos sueltos
-        backgroundColor: 'rgb(255, 100, 0)',  // Color de los puntos o línea
-        borderColor: 'rgb(255, 100, 0)',      // Color de la línea
-        borderWidth: 1,    // Grosor de la línea
-        yAxisID: 'y1'      // Definimos el eje Y que queremos usar
-      })
+      this.datasets.update(currentDatasets => [
+        ...currentDatasets,
+        {
+          label: `Tbh = ${result_.Tbh}`,
+          data: [{ x: tg, y: 0 }, { x: tbs, y: Yas }],
+          showLine: true,
+          backgroundColor: 'rgb(255, 100, 0)',
+          borderColor: 'rgb(255, 100, 0)',
+          borderWidth: 1,
+          yAxisID: 'y1'
+        }
+      ]);
     });
-    console.log(this.datasets)
+
+  }
+
+  calcularPuntos(data: any) {
+    const result = this.ecuations.main(+data.tbs, +data.hr, this.altitudValue());
+
+    // Actualizar el valor de `pointsData` con el nuevo punto
+    this.pointsData.update(currentPointsData => [
+      ...currentPointsData,
+      {
+        tbs: +data.tbs,
+        pv: result.pv,
+        W: result.W,
+        U: result.U,
+        Tbh: result.Tbh,
+        Tr: result.Tr,
+        Veh: result.Veh,
+        h: result.h,
+        pvs: result.pvs,
+        Ws: result.Ws,
+        hr: +data.hr
+      }
+    ]);
+
+    this.datasets.update(currentDatasets => [
+      ...currentDatasets,
+      {
+        label: `Punto (${data.tbs}, ${data.hr})`,
+        data: [{ x: +data.tbs, y: result.Ws }],
+        showLine: false,
+        backgroundColor: 'rgb(0, 255, 0)',
+        borderColor: 'rgb(0, 255, 0)',
+        pointRadius: 4, // Grosor del punto
+        pointHoverRadius: 4,
+        borderWidth: 2,
+        yAxisID: 'y2'
+      }
+    ]);
+
+    // Actualizar la data con los nuevos datasets
+    this.data.update(currentData => ({
+      ...currentData,
+      datasets: this.datasets()
+    }));
+
+    console.log(this.datasets());
   }
 }

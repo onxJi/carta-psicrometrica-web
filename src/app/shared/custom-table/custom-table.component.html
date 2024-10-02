@@ -1,0 +1,47 @@
+<div class="card">
+    <p-table #table [columns]="headers()" [value]="data()" [paginator]="true" [selectionPageOnly]="true" [rows]="rows()"
+        [lazy]="true" (onLazyLoad)="cambiarPagina($event)" [totalRecords]="elementosTotales()" [loading]="loading()"
+        [showCurrentPageReport]="true" currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}
+  Resultados" [(first)]="first" [scrollable]="true" responsiveLayout="stack" scrollHeight="flex">
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <ng-container>
+                    @for (col of columns; track $index) {
+                    <th id="tablecolumns">
+                        {{ col.header }}
+                    </th>
+                    }
+                </ng-container>
+                @if (acciones()) {
+                <th alignFrozen="right" pFrozenColumn [frozen]="true" id="acciones">
+                    Acciones
+                </th>
+                }
+
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-rowData let-columns="columns">
+            <tr>
+                @for (col of columns; track $index) {
+                <td>
+                    {{ getNestedValue(rowData, col.field) }}
+                </td>
+                }
+
+                @if(acciones()) {
+                <td alignFrozen="right" pFrozenColumn [frozen]="true">
+                    <div class="acciones">
+
+                    </div>
+                </td>
+                }
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="11"> No hay resultados</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

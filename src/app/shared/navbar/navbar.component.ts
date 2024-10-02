@@ -3,6 +3,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api/menuitem';
 import { PrimeNgExportModule } from '../primengExportModule/PrimeNgExportModule.module';
 import { CommonModule } from '@angular/common';
+import { style } from '@angular/animations';
 
 @Component({
   selector: 'app-navbar',
@@ -11,7 +12,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
   host: {
-
+    style: 'width: 100%;'
   }
 })
 export class NavbarComponent implements OnInit {
