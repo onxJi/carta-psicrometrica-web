@@ -1,4 +1,16 @@
 <div class="container-home">
-    <app-altitud-component></app-altitud-component>
-    <app-grafica></app-grafica>
+    <h3> Hola, Bienvenido 👋</h3>
+    <article class="container-cards">
+         @for (item of cartas; track $index) {
+        <div class="card-home">
+            <div class="card-home-title">
+                <img src={{item.icon}} alt={{item.label}} style="height: 30px">
+                <h5>{{item.label}}</h5>
+            </div>
+            
+            <p>{{item.description}}</p>
+        </div>
+        }
+    </article>
+   
 </div>

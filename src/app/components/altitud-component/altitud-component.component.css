@@ -8,8 +8,16 @@
   align-items: center;
   flex-direction: column;
   gap: 2rem;
-  padding: 1rem;
   width: 100%;
   max-width: 100%;
   margin-top: 2rem;
+}
+.color-picker-container{
+  width: 244px;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  gap: 1rem;
+  border-radius: 10px;
+  border: solid 1px #c0c0c0;
 }

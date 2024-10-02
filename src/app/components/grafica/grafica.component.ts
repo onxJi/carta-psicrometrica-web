@@ -66,7 +66,7 @@ export class GraficaComponent implements OnInit {
       this.calcularGrafica();
       this.calculoLineasTbh();
       this.calculoLineasHumedad();
-
+      this.actualizarGraficaPuntos();
       // Actualizar la data con los nuevos datasets
       this.data.update(currentData => ({
         ...currentData,
@@ -263,8 +263,8 @@ export class GraficaComponent implements OnInit {
         label: `Punto (${data.tbs}, ${data.hr})`,
         data: [{ x: +data.tbs, y: result.W }],
         showLine: false,
-        backgroundColor: 'rgb(0, 255, 0)',
-        borderColor: 'rgb(0, 255, 0)',
+        backgroundColor: data.color,
+        borderColor: data.color,
         pointRadius: 4, // Grosor del punto
         pointHoverRadius: 4,
         borderWidth: 2,
@@ -278,6 +278,29 @@ export class GraficaComponent implements OnInit {
       datasets: this.datasets()
     }));
 
-    console.log(this.datasets());
+    
+  }
+
+
+  actualizarGraficaPuntos() {
+    if(this.pointsData().length === 0) return;
+
+    this.pointsData().forEach((data) => {
+      this.datasets.update(currentDatasets => [
+        ...currentDatasets,
+        {
+          label: `Punto (${data.tbs}, ${data.hr})`,
+          data: [{ x: +data.tbs, y: data.W }],
+          showLine: false,
+          backgroundColor: 'rgb(0, 255, 0)',
+          borderColor: 'rgb(0, 255, 0)',
+          pointRadius: 4, // Grosor del punto
+          pointHoverRadius: 4,
+          borderWidth: 2,
+          yAxisID: 'y2'
+        }
+      ]);
+    });
+   
   }
 }

@@ -27,9 +27,13 @@ export class AltitudComponentComponent {
 
   formPoints = this.fb.group({
     tbs: [null, Validators.compose([Validators.required, Validaciones.onlyNumbersF])],
-    hr: [null, Validators.compose([Validators.required, Validaciones.onlyNumbersF])]
+    hr: [null, Validators.compose([Validators.required, Validaciones.onlyNumbersF])],
+    color: ['#000', Validators.required]
   });
 
+  get color() {
+    return this.formPoints.get('color')?.value
+  }
   constructor(
     private fb: FormBuilder,
     private altitudeService: AltitudeService,
@@ -47,8 +51,10 @@ export class AltitudComponentComponent {
   calcularPuntos() {
     const tbs = this.formPoints.get('tbs')?.value!;
     const hr = this.formPoints.get('hr')?.value!;
+    const color = this.formPoints.get('color')?.value!;
     if (tbs && hr) {
-      this.pointService.updateFormData(tbs, hr);
+      this.pointService.updateFormData(tbs, hr, color);
+      this.formPoints.reset();
     }
   }
 }

@@ -22,6 +22,21 @@ export default class HomePageComponent implements OnInit {
 
   data: any;
 
+  cartas = [
+    {
+      label: 'Cartas Psicrométricas',
+      url: "/cartas-psicrometricas",
+      icon: "assets/icon.svg",
+      description: "Construye cartas psicrometricas a diferentes altitudes y personalizalas como gustes."
+    },
+    {
+      label: 'Grafica Delta T (∆T)',
+      url: "/deltaT-indicador",
+      icon: "assets/icon.svg",
+      description: "Construye la grafica de Delta T (∆T)"
+    }
+  ]
+
   options: any;
 
   ngOnInit(): void {

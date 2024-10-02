@@ -1,15 +1,47 @@
 .container-home {
-  display: grid;
-  grid-template-columns: 1fr; /* Por defecto, una columna */
+  display: flex;
+  flex-direction: column;
   gap: 16px;
   width: 100%;
   max-width: 100vw;
   padding: 16px;
+  font-family: 'Poppins';
+}
+.container-cards{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 1rem;
+  width: 100%;
 }
 
-@media (min-width: 768px) {
-  /* Ajusta el tamaño según tus necesidades */
-  .container-home {
-    grid-template-columns: 2fr 3fr; /* Dos columnas, 2 fracciones y 3 fracciones */
-  }
+.card-home {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  /* Añadir un borde para separar el contenido del entorno */
+  border-radius: 5px;
+  /* Añadir esquinas redondeadas para un aspecto más suave */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  width: 100%; /* Ajusta el ancho al 100% del contenedor padre */
+  max-width: 100%;
+}
+
+.card-home >.card-home-title > h5, p {
+  margin: 0;
+}
+
+.card-home:hover {
+  scale: 1.05;
+  transition: all ease-in-out 0.3s;
+  cursor: pointer;
+}
+
+.card-home-title{
+  display: flex;
+  gap: 0.5rem;
+  
+  align-items: center;
 }
