@@ -10,7 +10,7 @@ import { GraficaDeltaTComponent } from '../../components/grafica-delta-t/grafica
   templateUrl: './delta-t-home.component.html',
   styleUrl: './delta-t-home.component.css',
   host: {
-    style: "width: 100%; height: 100vh;"
+    style: "width: 100%;"
   }
 })
 export default class DeltaTHomeComponent implements OnInit {

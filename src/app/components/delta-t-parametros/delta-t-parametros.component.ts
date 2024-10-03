@@ -5,6 +5,7 @@ import { CustomTableComponent } from '../../shared/custom-table/custom-table.com
 import { PointsService } from '../../services/points.service';
 import { AltitudeService } from '../../services/altitud-service/altitudeService.service';
 import { Validaciones } from '../../helpers/validaciones';
+import { PointsDeltaTService } from '../../services/points-delta-t.service';
 
 @Component({
   selector: 'app-delta-t-parametros',
@@ -30,7 +31,7 @@ export class DeltaTParametrosComponent {
   constructor(
     private fb: FormBuilder,
     private altitudeService: AltitudeService,
-    private pointService: PointsService
+    private pointService: PointsDeltaTService
   ) { }
 
 

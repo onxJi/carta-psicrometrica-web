@@ -5,7 +5,7 @@ import { Ecuations } from '../../shared/maths/Ecuaciones.ecuation';
 import { PsychrometricData } from '../../models/entities/PsychrometricData.model';
 import { optionsDeltaTChart } from '../../helpers/options-deltaT-chart';
 import { AltitudeService } from '../../services/altitud-service/altitudeService.service';
-import { PointsService } from '../../services/points.service';
+import { PointsDeltaTService } from '../../services/points-delta-t.service';
 
 @Component({
   selector: 'app-grafica-delta-t',
@@ -46,7 +46,7 @@ export class GraficaDeltaTComponent implements OnInit {
 
   constructor(
     private altitudService: AltitudeService,
-    private pointService: PointsService
+    private pointService: PointsDeltaTService
   ) { }
 
   ngOnInit(): void {
@@ -68,6 +68,12 @@ export class GraficaDeltaTComponent implements OnInit {
         datasets: this.datasets()
       }));
     });
+
+    this.pointService.formData$.subscribe(points => {
+      if (points) {
+        this.calcularPuntos(points);
+      }
+    });
   }
 
   calcularGrafica() {
@@ -75,44 +81,23 @@ export class GraficaDeltaTComponent implements OnInit {
     const altitud = this.altitudValue();
     let W_range: { [key: number]: { x: number, y: number }[] } = {};
 
-    // this.hr_range.forEach(hr => {
-    //   // Inicializar el array de la clave hr si no existe
-    //   if (!W_range[hr]) {
-    //     W_range[hr] = [];
-    //   }
-    //   this.tbs_range.forEach(tbs => {
-    //     const { Tbh } = this.ecuations.main(tbs, hr, this.altitudValue());
-
-    //     // calcular delta T
-    //     const deltaT = tbs - Tbh;
-    //     console.log(`Tbs: ${tbs}, HR: ${hr}, Tbh: ${Tbh}, deltaT: ${deltaT}`);
-    //     // Agregar el punto { x: tbs, y: W } al array correspondiente
-    //     W_range[hr].push({ x: tbs, y: deltaT });
-    //   });
-    // });
-
-    // Iterar sobre cada TBS primero y luego sobre HR
-    this.tbs_range.forEach(tbs => {
-      // Inicializar el array de la clave tbs si no existe
-      if (!W_range[tbs]) {
-        W_range[tbs] = [];
+    this.hr_range.forEach(hr => {
+      // Inicializar el array de la clave hr si no existe
+      if (!W_range[hr]) {
+        W_range[hr] = [];
       }
-      this.hr_range.forEach(hr => {
-        const { Tbh } = this.ecuations.main(tbs, hr, altitud);
+      this.tbs_range.forEach(tbs => {
+        const { Tbh } = this.ecuations.main(tbs, hr, this.altitudValue());
 
-        // Calcular delta T
+        // calcular delta T
         const deltaT = tbs - Tbh;
-        // Ignorar valores de deltaT que sean Infinity o NaN
-        if (!isFinite(deltaT)) {
-          console.log(`Ignorando punto: Tbs: ${tbs}, HR: ${hr}, Tbh: ${Tbh}, deltaT: ${deltaT}`);
-          return;
-        }
         console.log(`Tbs: ${tbs}, HR: ${hr}, Tbh: ${Tbh}, deltaT: ${deltaT}`);
-
-        // Agregar el punto { x: hr, y: deltaT } al array correspondiente
-        W_range[tbs].push({ x: hr, y: deltaT });
+        // Agregar el punto { x: tbs, y: W } al array correspondiente
+        W_range[hr].push({ x: tbs, y: deltaT });
       });
     });
+
+    
 
     // Crear los datasets
     Object.keys(W_range).forEach(tbsStr => {
@@ -122,18 +107,64 @@ export class GraficaDeltaTComponent implements OnInit {
       this.datasets.update(currentDatasets => [
         ...currentDatasets,
         {
-          label: `TBS = ${tbs}°C`,
+          label: `HR = ${tbs}`,
           data: dataPoints,
           showLine: true,
           backgroundColor: 'rgba(255, 100, 0, 0.5)',
           borderColor: 'rgb(255, 100, 0)',
           borderWidth: 1,
-          yAxisID: 'y1'
+          yAxisID: 'y1',
+          fill: '-1'
         }
       ]);
     });
 
   }
 
+
+  calcularPuntos(data: any) {
+    const result = this.ecuations.main(+data.tbs, +data.hr, this.altitudValue());
+    const deltaT = +data.tbs - result.Tbh;
+    // Actualizar el valor de `pointsData` con el nuevo punto
+    this.pointsData.update(currentPointsData => [
+      ...currentPointsData,
+      {
+        tbs: +data.tbs,
+        pv: result.pv,
+        W: result.W,
+        U: result.U,
+        Tbh: result.Tbh,
+        Tr: result.Tr,
+        Veh: result.Veh,
+        h: result.h,
+        pvs: result.pvs,
+        Ws: result.Ws,
+        hr: +data.hr
+      }
+    ]);
+
+    this.datasets.update(currentDatasets => [
+      ...currentDatasets,
+      {
+        label: `Punto (${data.tbs}, ${data.hr})`,
+        data: [{ x: +data.tbs, y: deltaT }],
+        showLine: false,
+        backgroundColor: data.color,
+        borderColor: data.color,
+        pointRadius: 4, // Grosor del punto
+        pointHoverRadius: 4,
+        borderWidth: 2,
+        yAxisID: 'y1'
+      }
+    ]);
+
+    // Actualizar la data con los nuevos datasets
+    this.data.update(currentData => ({
+      ...currentData,
+      datasets: this.datasets()
+    }));
+
+
+  }
 
 }
