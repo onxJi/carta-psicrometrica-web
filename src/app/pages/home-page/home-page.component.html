@@ -1,16 +1,16 @@
 <div class="container-home">
     <h3> Hola, Bienvenido 👋</h3>
     <article class="container-cards">
-         @for (item of cartas; track $index) {
-        <div class="card-home">
+        @for (item of cartas; track $index) {
+        <div class="card-home" [routerLink]="item.url">
             <div class="card-home-title">
-                <img src={{item.icon}} alt={{item.label}} style="height: 30px">
+                <img src={{item.icon}} alt={{item.label}} style="height: 20px">
                 <h5>{{item.label}}</h5>
             </div>
-            
+
             <p>{{item.description}}</p>
         </div>
         }
     </article>
-   
+
 </div>

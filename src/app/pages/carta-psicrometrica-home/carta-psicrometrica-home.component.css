@@ -1,0 +1,15 @@
+.container-home-carta {
+  display: grid;
+  grid-template-columns: 1fr; /* Por defecto, una columna */
+  gap: 16px;
+  width: 100%;
+  max-width: 100vw;
+  padding: 16px;
+}
+
+@media (min-width: 768px) {
+  /* Ajusta el tamaño según tus necesidades */
+  .container-home-carta {
+    grid-template-columns: 2fr 3fr; /* Dos columnas, 2 fracciones y 3 fracciones */
+  }
+}

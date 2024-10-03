@@ -7,6 +7,7 @@ import { Ecuations } from '../../shared/maths/Ecuaciones.ecuation';
 import { PsychrometricData } from '../../models/entities/PsychrometricData.model';
 import { CustomTableComponent } from '../../shared/custom-table/custom-table.component';
 import { PointsService } from '../../services/points.service';
+import { optionsPsychrometricChart } from '../../helpers/options-psychrometric-chart';
 
 @Component({
   selector: 'app-grafica',
@@ -48,14 +49,13 @@ export class GraficaComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
-    const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
+
     this.data.set({
       labels: this.tbs_range,
       datasets: this.datasets
     });
+
+    this.options = optionsPsychrometricChart;
 
     this.altitudService.altitude$.subscribe(altitud => {
       const altitudValue = altitud ?? 0;
@@ -80,76 +80,12 @@ export class GraficaComponent implements OnInit {
       }
     });
 
-    this.options = {
-      type: 'line',
-      maintainAspectRatio: false,
-      aspectRatio: 0.6,
-      elements: {
-        point: {
-          radius: 1
-        }
-      },
-      plugins: {
-        legend: {
-          labels: {
-            color: textColor
-          },
-          display: false
-        }
-      },
-      scales: {
-        x: {
-          display: true,
-          title: {
-            display: true,
-            text: 'Temperatura de bulbo seco (°C)'
-          },
-          ticks: {
-            stepSize: 1
-          },
-          type: 'linear',  // Asegúrate de que el eje X sea lineal
-          position: 'bottom',
-          min: 0,
-          max: 60
-        },
-        y: {
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: 'Entalpía (kJ/kg)'
-          },
-          min: 0,
-          max: 100,
-          type: 'linear',
-        },
-        y1: {
-          beginAtZero: true,
-          type: 'linear',
-          position: 'right',
-          title: {
-            display: true,
-            text: 'Razón de humedad (Kg/Kg)'
-          },
-          min: 0,
-          max: 0.08
-        },
-        y2: {
-          display: false,
-          beginAtZero: true,
-          position: 'right',
-          type: 'linear',
-          min: 0,
-          max: 0.08,
-        },
-      }
-    };
+
   }
 
 
   calcularGrafica() {
     const alt = this.altitudValue();
-    let data: any[] = [];
-    const documentStyle = getComputedStyle(document.documentElement);
 
     this.tbs_range.forEach(tbs => {
       const { Ws } = this.ecuations.main(tbs, 100, alt);
@@ -278,12 +214,12 @@ export class GraficaComponent implements OnInit {
       datasets: this.datasets()
     }));
 
-    
+
   }
 
 
   actualizarGraficaPuntos() {
-    if(this.pointsData().length === 0) return;
+    if (this.pointsData().length === 0) return;
 
     this.pointsData().forEach((data) => {
       this.datasets.update(currentDatasets => [
@@ -301,6 +237,6 @@ export class GraficaComponent implements OnInit {
         }
       ]);
     });
-   
+
   }
 }
