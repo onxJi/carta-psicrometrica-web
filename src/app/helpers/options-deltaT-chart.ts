@@ -29,8 +29,8 @@ export const optionsDeltaTChart = {
             },
             type: 'linear',  // Asegúrate de que el eje X sea lineal
             position: 'bottom',
-            min: 0,
-            max: 50
+            min: 1,
+            max: 40
         },
         y: {
             beginAtZero: true,

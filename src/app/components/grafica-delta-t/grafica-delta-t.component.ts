@@ -6,6 +6,7 @@ import { PsychrometricData } from '../../models/entities/PsychrometricData.model
 import { optionsDeltaTChart } from '../../helpers/options-deltaT-chart';
 import { AltitudeService } from '../../services/altitud-service/altitudeService.service';
 import { PointsDeltaTService } from '../../services/points-delta-t.service';
+import { deltaT_table } from '../../helpers/ValuesDeltaT';
 
 @Component({
   selector: 'app-grafica-delta-t',
@@ -81,51 +82,94 @@ export class GraficaDeltaTComponent implements OnInit {
     const altitud = this.altitudValue();
     let W_range: { [key: number]: { x: number, y: number }[] } = {};
 
-    this.hr_range.forEach(hr => {
-      // Inicializar el array de la clave hr si no existe
-      if (!W_range[hr]) {
-        W_range[hr] = [];
+    const deltaT_range = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+    let deltaT_values: { [key: number]: { x: number, y: number }[] } = {}
+
+    deltaT_range.forEach(delta => {
+      if (!deltaT_values[delta]) {
+        deltaT_values[delta] = [];
       }
       this.tbs_range.forEach(tbs => {
-        const { Tbh } = this.ecuations.main(tbs, hr, this.altitudValue());
-
-        // calcular delta T
-        const deltaT = tbs - Tbh;
-        //console.log(`Tbs: ${tbs}, HR: ${hr}, Tbh: ${Tbh}, deltaT: ${deltaT}`);
-        // Agregar el punto { x: tbs, y: W } al array correspondiente
-        W_range[hr].push({ x: tbs, y: deltaT });
-      });
+        const tk = tbs + 273.15;
+        const Tbh = tbs - delta;
+        const pvs = this.ecuations.pvsHpa(Tbh);
+        const a1 = 0.00120;
+        const pv = this.ecuations.pvHpa(pvs,tbs,Tbh,this.altitudValue(),a1);
+        const hr = (pv / pvs)*100;
+        deltaT_values[delta].push({x: tbs, y: hr});
+      })
     });
 
+    //deltaT_values = deltaT_table
+    console.log(deltaT_values)
 
 
-    // Crear los datasets
-    Object.keys(W_range).forEach(tbsStr => {
-      const tbs = Number(tbsStr);
-      const dataPoints = W_range[tbs];
+    Object.keys(deltaT_values).forEach(delta => {
+      const dT = Number(delta);
+      const dataPoints = deltaT_values[dT];
 
+      
       this.datasets.update(currentDatasets => [
         ...currentDatasets,
         {
-          label: `HR = ${tbs}`,
+          label: `Delta = ${delta}`,
           data: dataPoints,
           showLine: true,
-          backgroundColor: this.getColorForDeltaT(Math.max(...dataPoints.map(d => d.y))),
-          borderColor: this.getColorForDeltaT(Math.max(...dataPoints.map(d => d.y))),
+          borderColor: dT % 2 === 0 ? 'black'  :this.getColorForDeltaT(dT),
+          backgroundColor: this.getColorForDeltaT(dT),
           borderWidth: 1,
-          yAxisID: 'y1',
+          yAxisID: 'y',
           fill: '-1'
         }
       ]);
-    });
+    })
+
+
+    // this.hr_range.forEach(hr => {
+    //   // Inicializar el array de la clave hr si no existe
+    //   if (!W_range[hr]) {
+    //     W_range[hr] = [];
+    //   }
+    //   this.tbs_range.forEach(tbs => {
+    //     const { Tbh } = this.ecuations.main(tbs, hr, this.altitudValue());
+
+    //     // calcular delta T
+    //     const deltaT = tbs - Tbh;
+    //     //console.log(`Tbs: ${tbs}, HR: ${hr}, Tbh: ${Tbh}, deltaT: ${deltaT}`);
+    //     // Agregar el punto { x: tbs, y: W } al array correspondiente
+    //     W_range[hr].push({ x: tbs, y: deltaT });
+    //   });
+    // });
+
+    // console.log(W_range)
+
+    // // Crear los datasets
+    // Object.keys(W_range).forEach(tbsStr => {
+    //   const tbs = Number(tbsStr);
+    //   const dataPoints = W_range[tbs];
+
+    //   this.datasets.update(currentDatasets => [
+    //     ...currentDatasets,
+    //     {
+    //       label: `HR = ${tbs}`,
+    //       data: dataPoints,
+    //       showLine: true,
+    //       backgroundColor: this.getColorForDeltaT(Math.max(...dataPoints.map(d => d.y))),
+    //       borderColor: this.getColorForDeltaT(Math.max(...dataPoints.map(d => d.y))),
+    //       borderWidth: 1,
+    //       yAxisID: 'y1',
+    //       fill: '-1'
+    //     }
+    //   ]);
+    // });
 
   }
 
   // Función para determinar color según el valor de ΔT
   getColorForDeltaT(deltaT: number): string {
-    if (deltaT < 2) return 'rgba(255,200,0,0.5)'; // Banda de aplicación
-    if (deltaT >= 2 && deltaT < 8) return 'rgba(0,255,0,0.5)';
-    if (deltaT >= 8 && deltaT < 10) return 'rgba(255,200,0,0.5)' // Banda de condiciones marginales
+    if (deltaT <= 2) return 'rgba(255,200,0,0.5)'; // Banda de aplicación
+    if (deltaT >= 2 && deltaT <= 8) return 'rgba(0,255,0,0.5)';
+    if (deltaT >= 8 && deltaT <= 10) return 'rgba(255,200,0,0.5)' // Banda de condiciones marginales
     return 'rgba(255,0,0,0.5)'; // Banda de no aplicación
   }
 
@@ -162,7 +206,8 @@ export class GraficaDeltaTComponent implements OnInit {
         pointRadius: 4, // Grosor del punto
         pointHoverRadius: 4,
         borderWidth: 2,
-        yAxisID: 'y1'
+        yAxisID: 'y1',
+        zIndex: 1000
       }
     ]);
 
