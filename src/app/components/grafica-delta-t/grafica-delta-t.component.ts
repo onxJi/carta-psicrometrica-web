@@ -91,13 +91,13 @@ export class GraficaDeltaTComponent implements OnInit {
 
         // calcular delta T
         const deltaT = tbs - Tbh;
-        console.log(`Tbs: ${tbs}, HR: ${hr}, Tbh: ${Tbh}, deltaT: ${deltaT}`);
+        //console.log(`Tbs: ${tbs}, HR: ${hr}, Tbh: ${Tbh}, deltaT: ${deltaT}`);
         // Agregar el punto { x: tbs, y: W } al array correspondiente
         W_range[hr].push({ x: tbs, y: deltaT });
       });
     });
 
-    
+
 
     // Crear los datasets
     Object.keys(W_range).forEach(tbsStr => {
@@ -110,8 +110,8 @@ export class GraficaDeltaTComponent implements OnInit {
           label: `HR = ${tbs}`,
           data: dataPoints,
           showLine: true,
-          backgroundColor: 'rgba(255, 100, 0, 0.5)',
-          borderColor: 'rgb(255, 100, 0)',
+          backgroundColor: this.getColorForDeltaT(Math.max(...dataPoints.map(d => d.y))),
+          borderColor: this.getColorForDeltaT(Math.max(...dataPoints.map(d => d.y))),
           borderWidth: 1,
           yAxisID: 'y1',
           fill: '-1'
@@ -119,6 +119,14 @@ export class GraficaDeltaTComponent implements OnInit {
       ]);
     });
 
+  }
+
+  // Función para determinar color según el valor de ΔT
+  getColorForDeltaT(deltaT: number): string {
+    if (deltaT < 2) return 'rgba(255,200,0,0.5)'; // Banda de aplicación
+    if (deltaT >= 2 && deltaT < 8) return 'rgba(0,255,0,0.5)';
+    if (deltaT >= 8 && deltaT < 10) return 'rgba(255,200,0,0.5)' // Banda de condiciones marginales
+    return 'rgba(255,0,0,0.5)'; // Banda de no aplicación
   }
 
 
