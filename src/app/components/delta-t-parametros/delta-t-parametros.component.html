@@ -3,10 +3,14 @@
         carta psicrómetrica.</h2>
 
     <hr />
-    <form style="margin-top: 2rem;" [formGroup]="formAlt">
+    <form style="margin-top: 2rem;" [formGroup]="formAlt" class="formPoints">
         <p-floatLabel>
             <input pInputText id="altitud" name="altitud" formControlName="altitud" class="border" />
             <label for="altitud">Altitud</label>
+        </p-floatLabel>
+        <p-floatLabel>
+            <input pInputText id="vel_viento" name="vel_viento" formControlName="vel_viento" class="border" />
+            <label for="vel_viento">Velocidad del viento (m/s)</label>
         </p-floatLabel>
     </form>
 

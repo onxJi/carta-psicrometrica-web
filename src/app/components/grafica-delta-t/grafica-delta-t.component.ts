@@ -25,20 +25,14 @@ export class GraficaDeltaTComponent implements OnInit {
     { header: 'Tbs', field: 'tbs' },
     { header: 'HR %', field: 'hr' },
     { header: 'Tbh', field: 'Tbh' },
-    { header: 'Tr', field: 'Tr' },
-    { header: 'Veh', field: 'Veh' },
-    { header: 'h', field: 'h' },
-    { header: 'U', field: 'U' },
-    { header: 'Ws', field: 'Ws' },
-    { header: 'W', field: 'W' },
-    { header: 'Pv', field: 'pv' },
-    { header: 'Pvs', field: 'pvs' }
+    { header: 'Delta T (∆T)', field: 'deltaT' },
   ];
   data = signal({});
   ecuations = new Ecuations();
   options: any;
   datasets = signal<any[]>([]);
   altitudValue = signal(0);
+  vel_viento = signal(0);
   // Temperatura de bulbo seco (tbs) de 0 a 50 en incrementos de 5 (10 elementos)
   tbs_range = Array.from({ length: 11 }, (_, i) => i * 5);
 
@@ -56,9 +50,12 @@ export class GraficaDeltaTComponent implements OnInit {
       datasets: this.datasets
     });
     this.options = optionsDeltaTChart;
-    this.altitudService.altitude$.subscribe(altitud => {
-      const altitudValue = altitud ?? 0;
+
+    this.altitudService.altYvel$.subscribe(({ alt, vel_viento }) => {
+      const altitudValue = alt ?? 0;
+      const vel = vel_viento ?? 0;
       this.altitudValue.set(altitudValue);
+      this.vel_viento.set(vel);
       // Limpiar el datasets antes de calcular la gráfica
       this.datasets.set([]); // Limpiar datasets
 
@@ -77,12 +74,28 @@ export class GraficaDeltaTComponent implements OnInit {
     });
   }
 
+  calcularVelocidadViento(vel_viento: number) {
+    if (vel_viento >= 0 && vel_viento <= 0.5) {
+      return 0.00120;
+    }
+    if (vel_viento > 0.5 && vel_viento <= 1.5) {
+      return 0.00080;
+    }
+    if (vel_viento > 1.5 && vel_viento <= 4) {
+      return 0.00066;
+    }
+    if (vel_viento > 4 && vel_viento <= 10) {
+      return 0.00064;
+    }
+    return 0;
+  }
+
   calcularGrafica() {
     console.log('Calculando grafica');
     const altitud = this.altitudValue();
     let W_range: { [key: number]: { x: number, y: number }[] } = {};
 
-    const deltaT_range = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+    const deltaT_range = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
     let deltaT_values: { [key: number]: { x: number, y: number }[] } = {}
 
     deltaT_range.forEach(delta => {
@@ -90,32 +103,31 @@ export class GraficaDeltaTComponent implements OnInit {
         deltaT_values[delta] = [];
       }
       this.tbs_range.forEach(tbs => {
-        const tk = tbs + 273.15;
         const Tbh = tbs - delta;
         const pvs = this.ecuations.pvsHpa(Tbh);
-        const a1 = 0.00120;
-        const pv = this.ecuations.pvHpa(pvs,tbs,Tbh,this.altitudValue(),a1);
-        const hr = (pv / pvs)*100;
-        deltaT_values[delta].push({x: tbs, y: hr});
+        const a1 = this.calcularVelocidadViento(this.vel_viento());
+        const pv = this.ecuations.pvHpa(pvs, tbs, Tbh, this.altitudValue(), a1);
+        const hr = (pv / pvs) * 100;
+        deltaT_values[delta].push({ x: tbs, y: hr });
       })
     });
 
     //deltaT_values = deltaT_table
-    console.log(deltaT_values)
+
 
 
     Object.keys(deltaT_values).forEach(delta => {
       const dT = Number(delta);
       const dataPoints = deltaT_values[dT];
 
-      
+
       this.datasets.update(currentDatasets => [
         ...currentDatasets,
         {
           label: `Delta = ${delta}`,
           data: dataPoints,
           showLine: true,
-          borderColor: dT % 2 === 0 ? 'black'  :this.getColorForDeltaT(dT),
+          borderColor: dT % 2 === 0 ? 'black' : this.getColorForDeltaT(dT),
           backgroundColor: this.getColorForDeltaT(dT),
           borderWidth: 1,
           yAxisID: 'y',
@@ -176,37 +188,33 @@ export class GraficaDeltaTComponent implements OnInit {
 
   calcularPuntos(data: any) {
     const result = this.ecuations.main(+data.tbs, +data.hr, this.altitudValue());
-    const deltaT = +data.tbs - result.Tbh;
+    const P = 1013.3 / Math.exp(this.altitudValue() / (8430.15 - this.altitudValue() * 0.09514));
+    const a1 = this.calcularVelocidadViento(this.vel_viento());
+    const tbh = this.calcularTbh(+data.tbs, +data.hr, a1, P);
+    const deltaT = +data.tbs - tbh;
     // Actualizar el valor de `pointsData` con el nuevo punto
     this.pointsData.update(currentPointsData => [
       ...currentPointsData,
       {
         tbs: +data.tbs,
-        pv: result.pv,
-        W: result.W,
-        U: result.U,
-        Tbh: result.Tbh,
-        Tr: result.Tr,
-        Veh: result.Veh,
-        h: result.h,
-        pvs: result.pvs,
-        Ws: result.Ws,
-        hr: +data.hr
+        Tbh: tbh,
+        hr: +data.hr,
+        deltaT: deltaT,
       }
     ]);
 
     this.datasets.update(currentDatasets => [
       ...currentDatasets,
       {
-        label: `Punto (${data.tbs}, ${data.hr})`,
-        data: [{ x: +data.tbs, y: deltaT }],
+        label: `Delta ( ${deltaT})`,
+        data: [{ x: +data.tbs, y: +data.hr }],
         showLine: false,
         backgroundColor: data.color,
         borderColor: data.color,
         pointRadius: 4, // Grosor del punto
         pointHoverRadius: 4,
         borderWidth: 2,
-        yAxisID: 'y1',
+        yAxisID: 'y',
         zIndex: 1000
       }
     ]);
@@ -219,5 +227,36 @@ export class GraficaDeltaTComponent implements OnInit {
 
 
   }
+
+  calcularTbh(tbs: number, hr: number, a1: number, P: number) {
+    const tolerance = 0.0001; // Tolerancia para el cálculo numérico
+    let low = 0; // Límite inferior para tbh
+    let high = tbs; // Límite superior para tbh
+    let tbh = (low + high) / 2; // Inicialización de tbh
+
+    while (high - low > tolerance) {
+      const expFactorTbh = Math.exp((17.27 * tbh) / (237.3 + tbh)); // e^(17.27 * tbh / (237.3 + tbh))
+      const pvs_tbh = 6.11 * expFactorTbh; // pvs a tbh
+
+      const leftSide = (hr / 100) * pvs_tbh; // (hr / 100) * pvs(tbh)
+
+      const rightSide = pvs_tbh - a1 * P * (tbs - tbh); // pvs(tbh) - a1 * P * (tbs - tbh)
+
+      // Comparamos los lados de la ecuación para ajustar los límites
+      if (leftSide < rightSide) {
+        high = tbh;
+      } else {
+        low = tbh;
+      }
+
+      // Recalcular tbh como el punto medio de los nuevos límites
+      tbh = (low + high) / 2;
+    }
+
+    return tbh;
+  }
+
+
+
 
 }

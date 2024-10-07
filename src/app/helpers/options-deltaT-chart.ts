@@ -1,5 +1,5 @@
 import { reverse } from "dns";
-
+let delayed: boolean = false;
 export const optionsDeltaTChart = {
     type: 'line',
     maintainAspectRatio: false,
@@ -15,7 +15,22 @@ export const optionsDeltaTChart = {
                 color: 'black'
             },
             display: false
+        },
+        titleRotationPlugin: {
+            enabled: true // Habilita el plugin personalizado
         }
+    },
+    animation: {
+        onComplete: () => {
+            delayed = true;
+        },
+        delay: (context: any) => {
+            let delay = 0;
+            if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                delay = context.dataIndex * 300 + context.datasetIndex * 100;
+            }
+            return delay;
+        },
     },
     scales: {
         x: {
@@ -38,17 +53,17 @@ export const optionsDeltaTChart = {
                 display: true,
                 text: 'Humedad relativa (%)'
             },
-            min: 0,
+            min: 10,
             max: 100,
             type: 'linear',
         },
         y1: {
-            beginAtZero: true,
+            beginAtZero: false,
             type: 'linear',
             position: 'right',
             title: {
                 display: true,
-                text: 'Delta T (∆T)'
+                text: 'Delta T (∆T)',
             },
             min: 0,
             max: 20,

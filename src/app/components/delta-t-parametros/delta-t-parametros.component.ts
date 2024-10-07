@@ -16,7 +16,8 @@ import { PointsDeltaTService } from '../../services/points-delta-t.service';
 })
 export class DeltaTParametrosComponent {
   formAlt = this.fb.group({
-    altitud: [0, Validators.compose([Validators.required, Validaciones.onlyNumbersF])]  // El segundo parámetro debe ser un array de validadores
+    altitud: [0, Validators.compose([Validators.required, Validaciones.onlyNumbersF])],
+    vel_viento: [null, Validators.compose([Validators.required, Validaciones.onlyNumbersF])] // El segundo parámetro debe ser un array de validadores
   });
 
   formPoints = this.fb.group({
@@ -36,10 +37,11 @@ export class DeltaTParametrosComponent {
 
 
   calcular() {
-    const altitud = this.formAlt.get('altitud')?.value;
-    if (altitud) {
-      this.altitudeService.updateAltitude(altitud);
-    }
+    const altitud = this.formAlt.get('altitud')?.value!;
+    const vel_viento = +this.formAlt.get('vel_viento')?.value!;
+    this.altitudeService.updateAltitudYVelocidad(altitud, vel_viento);
+    console.log(altitud, vel_viento);
+
   }
 
   calcularPuntos() {

@@ -16,12 +16,12 @@ export class Ecuations {
 
     presionVaporSaturacion(t: number) {
         const a1 = -5.8002206 * Math.pow(10, 3);
-        const a2 = 1.3914993 ;
-        const a3 = -4.8640239 * Math.pow(10, -2) ;
-        const a4 = 4.1764768 * Math.pow(10, -5) ;
-        const a5 = -1.4452093 * Math.pow(10, -8) ;
-        const a6 = 0 ;
-        const a7 = 6.5459673 ;
+        const a2 = 1.3914993;
+        const a3 = -48.640239 * Math.pow(10, -3);
+        const a4 = 41.764768 * Math.pow(10, -6);
+        const a5 = -14.452093 * Math.pow(10, -9);
+        const a6 = 0;
+        const a7 = 6.5459673;
         return Math.exp(a1 / t + a2 + a3 * t + a4 * Math.pow(t, 2) + a5 * Math.pow(t, 3) + a6 * Math.pow(t, 4) + a7 * Math.log(t));
     }
 
@@ -73,16 +73,31 @@ export class Ecuations {
     }
 
 
-    pvsHpa(t: number){
-       const pvs = 6.11 * Math.exp((17.27*t)/(237.3+t));
-       return pvs
+    pvsHpa(t: number) {
+        const pvs = 6.11 * Math.exp((17.27 * t) / (237.3 + t));
+        return pvs
     }
 
-    pvHpa (pvs: number, tbs: number, tbh: number, alt: number, a1: number) {
+
+    pvHpa(pvs: number, tbs: number, tbh: number, alt: number, a1: number) {
         const P = 1013.3 / Math.exp(alt / (8430.15 - alt * 0.09514))
-        const pv = pvs -a1*P*(tbs-tbh);
+        const pv = pvs - a1 * P * (tbs - tbh);
         return pv
     }
+
+    pvTprHpa(tpr: number) {
+        const pv = 6.112 * Math.exp((17.27 * tpr) / (237.3 + tpr));
+        return pv
+    }
+
+    Tpr_tbs(tbs: number, hr: number) {
+        const Tpr = tbs + 35 * Math.log10(hr);
+        return Tpr
+    }
+
+
+
+
     /* 
     ! Formulas para calcular Hr %
 

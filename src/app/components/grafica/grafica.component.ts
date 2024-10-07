@@ -226,7 +226,7 @@ export class GraficaComponent implements OnInit {
         ...currentDatasets,
         {
           label: `Punto (${data.tbs}, ${data.hr})`,
-          data: [{ x: +data.tbs, y: data.W }],
+          data: [{ x: +data.tbs!, y: data.W }],
           showLine: false,
           backgroundColor: 'rgb(0, 255, 0)',
           borderColor: 'rgb(0, 255, 0)',

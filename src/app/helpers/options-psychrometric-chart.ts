@@ -46,7 +46,7 @@ export const optionsPsychrometricChart = {
             position: 'right',
             title: {
                 display: true,
-                text: 'Razón de humedad (Kg/Kg)'
+                text: 'Razón de humedad (kg/kg)'
             },
             min: 0,
             max: 0.08
