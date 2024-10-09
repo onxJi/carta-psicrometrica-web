@@ -7,6 +7,7 @@ import { optionsDeltaTChart } from '../../helpers/options-deltaT-chart';
 import { AltitudeService } from '../../services/altitud-service/altitudeService.service';
 import { PointsDeltaTService } from '../../services/points-delta-t.service';
 import { deltaT_table } from '../../helpers/ValuesDeltaT';
+import { roundToInternationalSystem } from '../../helpers/redondeoSI.helper';
 
 @Component({
   selector: 'app-grafica-delta-t',
@@ -22,10 +23,10 @@ export class GraficaDeltaTComponent implements OnInit {
   pointsData = signal<PsychrometricData[]>([]);
   // Tabla
   headers = [
-    { header: 'Tbs', field: 'tbs' },
-    { header: 'HR %', field: 'hr' },
-    { header: 'Tbh', field: 'Tbh' },
-    { header: 'Delta T (∆T)', field: 'deltaT' },
+    { header: 'Tbs', field: 'tbs' , tool: "Temperatura de bulbo seco"},
+    { header: 'HR %', field: 'hr', tool: "Humedad Relativa %" },
+    { header: 'Tbh', field: 'Tbh', tool: "Temperatura de bulbo humedo" },
+    { header: 'Delta T (∆T)', field: 'deltaT', tool: "Delta T indicador" },
   ];
   data = signal({});
   ecuations = new Ecuations();
@@ -104,10 +105,10 @@ export class GraficaDeltaTComponent implements OnInit {
       }
       this.tbs_range.forEach(tbs => {
         const Tbh = tbs - delta;
-        const pvs = this.ecuations.pvsHpa(Tbh);
+        const pvs = roundToInternationalSystem(this.ecuations.pvsHpa(Tbh), 4);
         const a1 = this.calcularVelocidadViento(this.vel_viento());
-        const pv = this.ecuations.pvHpa(pvs, tbs, Tbh, this.altitudValue(), a1);
-        const hr = (pv / pvs) * 100;
+        const pv = roundToInternationalSystem(this.ecuations.pvHpa(pvs, tbs, Tbh, this.altitudValue(), a1),4);
+        const hr = roundToInternationalSystem((pv / pvs) * 100,4);
         deltaT_values[delta].push({ x: tbs, y: hr });
       })
     });
@@ -190,8 +191,10 @@ export class GraficaDeltaTComponent implements OnInit {
     const result = this.ecuations.main(+data.tbs, +data.hr, this.altitudValue());
     const P = 1013.3 / Math.exp(this.altitudValue() / (8430.15 - this.altitudValue() * 0.09514));
     const a1 = this.calcularVelocidadViento(this.vel_viento());
-    const tbh = this.calcularTbh(+data.tbs, +data.hr, a1, P);
-    const deltaT = +data.tbs - tbh;
+    let tbh = this.calcularTbh(+data.tbs, +data.hr, a1, P);
+    tbh = roundToInternationalSystem(tbh,4)
+    let deltaT = +data.tbs - tbh;
+    deltaT = roundToInternationalSystem(deltaT,4)
     // Actualizar el valor de `pointsData` con el nuevo punto
     this.pointsData.update(currentPointsData => [
       ...currentPointsData,

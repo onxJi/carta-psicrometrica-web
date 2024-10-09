@@ -8,11 +8,20 @@ import { PsychrometricData } from '../../models/entities/PsychrometricData.model
 import { CustomTableComponent } from '../../shared/custom-table/custom-table.component';
 import { PointsService } from '../../services/points.service';
 import { optionsPsychrometricChart } from '../../helpers/options-psychrometric-chart';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { AltitudComponentComponent } from '../altitud-component/altitud-component.component';
+import { EditarPuntosComponent } from '../editar-puntos/editar-puntos.component';
+
 
 @Component({
   selector: 'app-grafica',
   standalone: true,
   imports: [PrimeNgExportModule, CustomTableComponent],
+  providers:[
+    DialogService,
+    ConfirmationService
+  ],
   templateUrl: './grafica.component.html',
   styleUrl: './grafica.component.css',
   host: {
@@ -20,21 +29,21 @@ import { optionsPsychrometricChart } from '../../helpers/options-psychrometric-c
   }
 })
 export class GraficaComponent implements OnInit {
-
+  ref: DynamicDialogRef | undefined;
   pointsData = signal<PsychrometricData[]>([]);
   // Tabla
   headers = [
-    { header: 'Tbs', field: 'tbs' },
-    { header: 'HR %', field: 'hr' },
-    { header: 'Tbh', field: 'Tbh' },
-    { header: 'Tr', field: 'Tr' },
-    { header: 'Veh', field: 'Veh' },
-    { header: 'h', field: 'h' },
-    { header: 'U', field: 'U' },
-    { header: 'Ws', field: 'Ws' },
-    { header: 'W', field: 'W' },
-    { header: 'Pv', field: 'pv' },
-    { header: 'Pvs', field: 'pvs' }
+    { header: 'Tbs', field: 'tbs', tool: "Temperatura de bulbo seco" },
+    { header: 'HR %', field: 'hr', tool: "Humedad Relativa en %" },
+    { header: 'Tbh', field: 'Tbh', tool: "Temperatura de bulbo húmedo" },
+    { header: 'Tr', field: 'Tr' , tool: "Temperatura de punto de rocío"},
+    { header: 'Veh', field: 'Veh', tool: "Volumen especifico" },
+    { header: 'h', field: 'h' , tool: "Entalpía"},
+    { header: 'U', field: 'U', tool: "Grado saturación" },
+    { header: 'Ws', field: 'Ws', tool: "Razón de humedad a saturación" },
+    { header: 'W', field: 'W', tool: "Razón de humedad" },
+    { header: 'Pv', field: 'pv', tool: "Presión de vapor parcial" },
+    { header: 'Pvs', field: 'pvs', tool: "Presión de vapor a saturación" }
   ];
   data = signal({});
   ecuations = new Ecuations();
@@ -45,7 +54,10 @@ export class GraficaComponent implements OnInit {
   hr_range = Array.from({ length: 11 }, (_, i) => i * 10);
   constructor(
     private altitudService: AltitudeService,
-    private pointService: PointsService
+    private pointService: PointsService,
+    private messageService: MessageService,
+    private dialog: DialogService,
+    private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
@@ -80,6 +92,10 @@ export class GraficaComponent implements OnInit {
       }
     });
 
+    this.pointService.formDataNew$.subscribe( datos => {
+      if(!datos?.dataAnterior && !datos?.dataNueva) return;
+      this.editarPuntos(datos.dataAnterior,datos.dataNueva);
+    } )
 
   }
 
@@ -189,7 +205,8 @@ export class GraficaComponent implements OnInit {
         h: result.h,
         pvs: result.pvs,
         Ws: result.Ws,
-        hr: +data.hr
+        hr: +data.hr,
+        color: data.color
       }
     ]);
 
@@ -214,6 +231,7 @@ export class GraficaComponent implements OnInit {
       datasets: this.datasets()
     }));
 
+    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Se ha graficado el dato correctamente' })
 
   }
 
@@ -239,4 +257,117 @@ export class GraficaComponent implements OnInit {
     });
 
   }
+
+  editarDatos(data: any) {
+    this.ref = this.dialog.open(EditarPuntosComponent, {
+      header: 'Editar Datos',
+      width: 'auto',
+      data: data,
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000
+    });
+
+   
+  }
+
+  editarPuntos(dataAnterior: any, nuevaData: any) {
+    // Actualizar el punto en pointsData
+    const result = this.ecuations.main(+nuevaData.tbs, +nuevaData.hr, this.altitudValue());
+    this.pointsData.update(currentPointsData => {
+      const index = currentPointsData.findIndex(point => point.tbs === dataAnterior.tbs && point.hr === dataAnterior.hr);
+      if (index !== -1) {
+        currentPointsData[index] = {
+          tbs: +nuevaData.tbs,
+          pv: result.pv,
+          W: result.W,
+          U: result.U,
+          Tbh: result.Tbh,
+          Tr: result.Tr,
+          Veh: result.Veh,
+          h: result.h,
+          pvs: result.pvs,
+          Ws: result.Ws,
+          hr: +nuevaData.hr,
+          color: nuevaData.color
+        };
+      }
+      return currentPointsData;
+    });
+
+    // Actualizar el punto en datasets
+    this.datasets.update(currentDatasets => {
+      const index = currentDatasets.findIndex(dataset => dataset.label === `Punto (${dataAnterior.tbs}, ${dataAnterior.hr})`);
+      if (index !== -1) {
+        currentDatasets[index] = {
+          label: `Punto (${nuevaData.tbs}, ${nuevaData.hr})`,
+          data: [{ x: +nuevaData.tbs, y: result.W }],
+          showLine: false,
+          backgroundColor: nuevaData.color,
+          borderColor: nuevaData.color,
+          pointRadius: 4, // Grosor del punto
+          pointHoverRadius: 4,
+          borderWidth: 2,
+          yAxisID: 'y2'
+        };
+      }
+      return currentDatasets;
+    });
+
+    // Actualizar la data con los nuevos datasets
+    this.data.update(currentData => ({
+      ...currentData,
+      datasets: this.datasets()
+    }));
+  }
+
+
+  eliminarPunto(data: any) {
+    this.confirmationService.confirm({
+      
+      message: '¿Está seguro de eliminar?',
+      header: 'Confirmación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon: "none",
+      rejectIcon: "none",
+      rejectButtonStyleClass: "p-button-text",
+      acceptLabel: "Aceptar",
+      rejectLabel: "Cancelar",
+      accept: () => {
+        this.confirmarEliminacion(data);
+      },
+      reject: () => {
+        this.messageService.add({ severity: 'error', summary: 'Cancelado', detail: 'Se ha cancelado la eliminación', life: 3000 });
+      }
+    });
+  }
+
+
+  confirmarEliminacion(data:any) {
+    // Eliminar el punto de pointsData
+    this.pointsData.update(currentPointsData => {
+      const index = currentPointsData.findIndex(point => point.tbs === data.tbs && point.hr === data.hr);
+      if (index !== -1) {
+        currentPointsData.splice(index, 1);
+      }
+      return currentPointsData;
+    });
+
+    // Eliminar el punto de datasets
+    this.datasets.update(currentDatasets => {
+      const index = currentDatasets.findIndex(dataset => dataset.label === `Punto (${data.tbs}, ${data.hr})`);
+      if (index !== -1) {
+        currentDatasets.splice(index, 1);
+      }
+      return currentDatasets;
+    });
+
+    // Actualizar la data con los nuevos datasets
+    this.data.update(currentData => ({
+      ...currentData,
+      datasets: this.datasets()
+    }));
+
+    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Se ha eliminado el dato correctamente' });
+  }
+
 }

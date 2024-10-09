@@ -31,6 +31,8 @@ import { PanelModule } from 'primeng/panel';
 import { ChartModule } from 'primeng/chart';
 import { MenubarModule } from 'primeng/menubar';
 import { ColorPickerModule } from 'primeng/colorpicker';
+import { TooltipModule } from 'primeng/tooltip';
+
 @NgModule({
     declarations: [],
     imports: [],
@@ -66,7 +68,8 @@ import { ColorPickerModule } from 'primeng/colorpicker';
         PanelModule,
         ChartModule,
         MenubarModule,
-        ColorPickerModule
+        ColorPickerModule,
+        TooltipModule
     ]
 })
 export class PrimeNgExportModule {

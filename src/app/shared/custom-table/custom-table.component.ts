@@ -3,6 +3,7 @@ import { PrimeNgExportModule } from '../primengExportModule/PrimeNgExportModule.
 import { LazyLoadEvent } from 'primeng/api';
 import { TableLazyLoadEvent } from 'primeng/table';
 import { style } from '@angular/animations';
+import { roundToInternationalSystem } from '../../helpers/redondeoSI.helper';
 
 @Component({
   selector: 'app-custom-table',
@@ -26,7 +27,12 @@ export class CustomTableComponent {
   rows = input(10);
   loading = input(false);
   resetTable = input(false);
+  editButton = input(false);
+  editOuput = output<any>();
+  deleteButton = input(false);
+  deleteOutput = output<any>();
   paginaActual = output<number>();
+
   selectionType = null;
   selection: any;
   first = 0;
@@ -37,9 +43,21 @@ export class CustomTableComponent {
     this.paginaActual.emit(page);
   }
 
+  edit(data: any) {
+    this.editOuput.emit(data);
+  }
+  delete(data: any ){
+    this.deleteOutput.emit(data);
+  }
   // Obtener valores anidados para mostrarlos en la tabla
   getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((acc, part) => acc[part], obj);
+    const value = path.split('.').reduce((acc, part) => acc[part], obj);
+    if (typeof value === 'number') {
+      return roundToInternationalSystem(value, 4); // Redondear a 4 cifras significativas
+    } else {
+      return value;
+    }
   }
+
 
 }

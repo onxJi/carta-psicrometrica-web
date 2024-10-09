@@ -11,4 +11,5 @@ export interface PsychrometricData {
     Ws?: number;
     hr?: number;
     deltaT?: number;
+    color?: string;
 }

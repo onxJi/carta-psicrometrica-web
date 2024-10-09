@@ -1,0 +1,19 @@
+<article class="container-edit-modal">
+    <form [formGroup]="formPoints" class="formPoints">
+        <p-floatLabel>
+            <input pInputText id="tbs" name="tbs" formControlName="tbs" class="border" [style]="{width: '100%'}" />
+            <label for="tbs">Temperatura Bulbo Seco °C</label>
+        </p-floatLabel>
+        <p-floatLabel>
+            <input pInputText id="hr" name="hr" formControlName="hr" class="border" [style]="{width: '100%'}" />
+            <label for="hr">Humedad Relativa %</label>
+        </p-floatLabel>
+        <div class="color-picker-container">
+            <p-colorPicker formControlName="color" [appendTo]="'body'"/>
+            <span>{{ color }}</span>
+        </div>
+    </form>
+    <p-button label="Actualizar" [outlined]="true" [style]="{ padding: '0.25rem', marginTop: '1rem', alignSelf: 'flex-end' }"
+        [disabled]="formPoints.invalid" (onClick)="actualizar()" />
+</article>
+

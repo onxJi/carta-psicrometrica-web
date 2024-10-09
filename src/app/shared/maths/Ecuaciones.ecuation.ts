@@ -75,6 +75,7 @@ export class Ecuations {
 
     pvsHpa(t: number) {
         const pvs = 6.11 * Math.exp((17.27 * t) / (237.3 + t));
+        //const pvs = Math.exp((60.433 - 6834.271) / (t - 5.16923 * Math.log(t)))
         return pvs
     }
 

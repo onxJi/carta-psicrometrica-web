@@ -2,3 +2,9 @@
   width: 100%;
   overflow-x: auto;
 }
+.acciones {
+  display: flex;
+  gap: 0.5rem;
+  align-content: center;
+  justify-content: center;
+}

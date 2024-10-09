@@ -8,7 +8,10 @@
                 <ng-container>
                     @for (col of columns; track $index) {
                     <th id="tablecolumns">
-                        {{ col.header }}
+                        {{ col.header }} 
+                        @if(col.tool) {
+                            <i class="pi pi-question-circle" style="font-size: 0.7rem; color: blue" pTooltip="{{col.tool}}" tooltipPosition="left"></i>
+                        }
                     </th>
                     }
                 </ng-container>
@@ -32,7 +35,15 @@
                 @if(acciones()) {
                 <td alignFrozen="right" pFrozenColumn [frozen]="true">
                     <div class="acciones">
-
+                        @if(editButton()) {
+                            <p-button  icon="pi pi-file-edit" (click)="edit(rowData)" 
+                            pTooltip="Editar" ></p-button>
+                        }
+                        @if(deleteButton()) {
+                            <p-button icon="pi pi-trash" (click)="delete(rowData)" severity="danger"
+                            pTooltip="Eliminar"></p-button>
+                        }
+                        
                     </div>
                 </td>
                 }
