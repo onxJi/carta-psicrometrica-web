@@ -367,7 +367,10 @@ export class GraficaComponent implements OnInit {
       datasets: this.datasets()
     }));
 
-    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Se ha eliminado el dato correctamente' });
+    this.messageService.add({ severity: 'success', 
+      summary: 'Éxito', 
+      detail: 'Se ha eliminado el dato correctamente' 
+    });
   }
 
 }

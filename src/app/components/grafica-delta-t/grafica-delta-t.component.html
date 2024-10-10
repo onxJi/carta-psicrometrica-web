@@ -2,5 +2,8 @@
     <p-chart type="line" [data]="this.data()" [options]="options" />
 
     <app-custom-table [acciones]="false" [data]="pointsData()" [headers]="headers"
-        [elementosTotales]="pointsData().length" [acciones]="true"></app-custom-table>
+        [elementosTotales]="pointsData().length" [acciones]="true" [editButton]="true" [deleteButton]="true"
+        (editOuput)="editarDatos($event)" (deleteOutput)="eliminarPunto($event)">
+    </app-custom-table>
 </div>
+<p-confirmDialog></p-confirmDialog>

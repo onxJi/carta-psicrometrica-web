@@ -4,6 +4,7 @@ import { Validaciones } from '../../helpers/validaciones';
 import { PrimeNgExportModule } from '../../shared/primengExportModule/PrimeNgExportModule.module';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { PointsService } from '../../services/points.service';
+import { PointsDeltaTService } from '../../services/points-delta-t.service';
 
 @Component({
   selector: 'app-editar-puntos',
@@ -29,6 +30,7 @@ export class EditarPuntosComponent implements OnInit {
     private fb: FormBuilder,
     private configDialog: DynamicDialogConfig,
     private pointService: PointsService,
+    private deltaPointService: PointsDeltaTService,
     private ref: DynamicDialogRef
   ) { }
 
@@ -47,6 +49,27 @@ export class EditarPuntosComponent implements OnInit {
   }
 
   actualizar() {
+    if(!this.configDialog.data.deltaT) this.actualizarPuntosCartaPsicrometrica();
+    else this.actualizarPuntosDeltaT();
+  }
+
+  actualizarPuntosDeltaT() {
+    const tbs = this.formPoints.get('tbs')?.value!;
+    const hr = this.formPoints.get('hr')?.value!;
+    const color = this.formPoints.get('color')?.value!;
+    const dataNueva = {
+      tbs: +tbs,
+      hr: +hr,
+      color: color
+    }
+    if (tbs && hr) {
+      this.deltaPointService.updateFormDataNew(this.configDialog.data, dataNueva);
+      this.formPoints.reset();
+      this.ref.close();
+    }
+  }
+
+  actualizarPuntosCartaPsicrometrica() {
     const tbs = this.formPoints.get('tbs')?.value!;
     const hr = this.formPoints.get('hr')?.value!;
     const color = this.formPoints.get('color')?.value!;

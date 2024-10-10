@@ -8,11 +8,17 @@ import { AltitudeService } from '../../services/altitud-service/altitudeService.
 import { PointsDeltaTService } from '../../services/points-delta-t.service';
 import { deltaT_table } from '../../helpers/ValuesDeltaT';
 import { roundToInternationalSystem } from '../../helpers/redondeoSI.helper';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { EditarPuntosComponent } from '../editar-puntos/editar-puntos.component';
 
 @Component({
   selector: 'app-grafica-delta-t',
   standalone: true,
-  imports: [PrimeNgExportModule, CustomTableComponent],
+  imports: [PrimeNgExportModule, CustomTableComponent, ],
+  providers : [
+    DialogService, ConfirmationService
+  ],
   templateUrl: './grafica-delta-t.component.html',
   styleUrl: './grafica-delta-t.component.css',
   host: {
@@ -21,6 +27,7 @@ import { roundToInternationalSystem } from '../../helpers/redondeoSI.helper';
 })
 export class GraficaDeltaTComponent implements OnInit {
   pointsData = signal<PsychrometricData[]>([]);
+  ref: DynamicDialogRef | undefined;
   // Tabla
   headers = [
     { header: 'Tbs', field: 'tbs' , tool: "Temperatura de bulbo seco"},
@@ -42,7 +49,10 @@ export class GraficaDeltaTComponent implements OnInit {
 
   constructor(
     private altitudService: AltitudeService,
-    private pointService: PointsDeltaTService
+    private pointService: PointsDeltaTService,
+    private dialog: DialogService,
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService,
   ) { }
 
   ngOnInit(): void {
@@ -73,6 +83,11 @@ export class GraficaDeltaTComponent implements OnInit {
         this.calcularPuntos(points);
       }
     });
+
+    this.pointService.formDataNew$.subscribe(datos => {
+      if (!datos?.dataAnterior && !datos?.dataNueva) return;
+      this.editarPuntos(datos.dataAnterior, datos.dataNueva);
+    })
   }
 
   calcularVelocidadViento(vel_viento: number) {
@@ -188,7 +203,6 @@ export class GraficaDeltaTComponent implements OnInit {
 
 
   calcularPuntos(data: any) {
-    const result = this.ecuations.main(+data.tbs, +data.hr, this.altitudValue());
     const P = 1013.3 / Math.exp(this.altitudValue() / (8430.15 - this.altitudValue() * 0.09514));
     const a1 = this.calcularVelocidadViento(this.vel_viento());
     let tbh = this.calcularTbh(+data.tbs, +data.hr, a1, P);
@@ -203,6 +217,7 @@ export class GraficaDeltaTComponent implements OnInit {
         Tbh: tbh,
         hr: +data.hr,
         deltaT: deltaT,
+        color: data.color
       }
     ]);
 
@@ -260,6 +275,120 @@ export class GraficaDeltaTComponent implements OnInit {
   }
 
 
+
+  editarDatos(data: any) {
+    this.ref = this.dialog.open(EditarPuntosComponent, {
+      header: 'Editar Datos',
+      width: 'auto',
+      data: data,
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000
+    });
+  }
+
+  editarPuntos(dataAnterior: any, dataNueva: any) {
+    const P = 1013.3 / Math.exp(this.altitudValue() / (8430.15 - this.altitudValue() * 0.09514));
+    const a1 = this.calcularVelocidadViento(this.vel_viento());
+    let tbh = this.calcularTbh(+dataNueva.tbs, +dataNueva.hr, a1, P);
+    tbh = roundToInternationalSystem(tbh, 4)
+    let deltaT = +dataNueva.tbs - tbh;
+    deltaT = roundToInternationalSystem(deltaT, 4)
+
+    // Actualizar el valor de `pointsData` con el nuevo punto
+    this.pointsData.update(currentPointsData => {
+      const index = currentPointsData.findIndex(point => point.tbs === dataAnterior.tbs && point.hr === dataAnterior.hr);
+      if (index !== -1) {
+        currentPointsData[index] = {
+          tbs: +dataNueva.tbs,
+          Tbh: tbh,
+          hr: +dataNueva.hr,
+          deltaT: deltaT,
+          color: dataNueva.color
+        };
+      }
+      return currentPointsData;
+
+    });
+
+    // Actualizar el punto en datasets
+    this.datasets.update(currentDatasets => {
+      const index = currentDatasets.findIndex(dataset => dataset.label === `Delta ( ${dataAnterior.deltaT})`);
+      if (index !== -1) {
+        currentDatasets[index] = {
+          label: `Delta ( ${deltaT})`,
+          data: [{ x: +dataNueva.tbs, y: +dataNueva.hr }],
+          showLine: false,
+          backgroundColor: dataNueva.color,
+          borderColor: dataNueva.color,
+          pointRadius: 4, // Grosor del punto
+          pointHoverRadius: 4,
+          borderWidth: 2,
+          yAxisID: 'y',
+          zIndex: 1000
+        };
+      }
+      return currentDatasets;
+    });
+
+    // Actualizar la data con los nuevos datasets
+    this.data.update(currentData => ({
+      ...currentData,
+      datasets: this.datasets()
+    }));
+
+  }
+
+  eliminarPunto(data: any) {
+    this.confirmationService.confirm({
+
+      message: '¿Está seguro de eliminar?',
+      header: 'Confirmación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon: "none",
+      rejectIcon: "none",
+      rejectButtonStyleClass: "p-button-text",
+      acceptLabel: "Aceptar",
+      rejectLabel: "Cancelar",
+      accept: () => {
+        this.confirmarEliminacion(data);
+      },
+      reject: () => {
+        this.messageService.add({ severity: 'error', summary: 'Cancelado', detail: 'Se ha cancelado la eliminación', life: 3000 });
+      }
+    });
+  }
+
+  confirmarEliminacion(data: any) {
+    // Eliminar el punto de pointsData
+    this.pointsData.update(currentPointsData => {
+      const index = currentPointsData.findIndex(point => point.tbs === data.tbs && point.hr === data.hr);
+      if (index !== -1) {
+        currentPointsData.splice(index, 1);
+      }
+      return currentPointsData;
+    });
+
+    // Eliminar el punto de datasets
+    this.datasets.update(currentDatasets => {
+      const index = currentDatasets.findIndex(dataset => dataset.label === `Delta ( ${data.deltaT})`);
+      if (index !== -1) {
+        currentDatasets.splice(index, 1);
+      }
+      return currentDatasets;
+    });
+
+    // Actualizar la data con los nuevos datasets
+    this.data.update(currentData => ({
+      ...currentData,
+      datasets: this.datasets()
+    }));
+
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'Se ha eliminado el dato correctamente'
+    });
+  }
 
 
 }
