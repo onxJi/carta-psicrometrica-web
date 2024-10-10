@@ -42,3 +42,29 @@
 
     </p-panel>
 </div>
+<div style="margin-top: 1rem;">
+    <p-panel [toggleable]="true" header="Anexar archivos" [collapsed]="true" >
+        <h2 style="font-size: 12px;">Agregue un archivo <code>.txt</code> y grafica los datos de temperatura del bulbo seco y humedad relativa.</h2>
+
+        <hr />
+        <form [formGroup]="formPoints" class="formPoints">
+            <p-floatLabel>
+                <input pInputText id="tbs" name="tbs" formControlName="tbs" class="border" [style]="{width: '100%'}" />
+                <label for="tbs">Temperatura Bulbo Seco °C</label>
+            </p-floatLabel>
+            <p-floatLabel>
+                <input pInputText id="hr" name="hr" formControlName="hr" class="border" [style]="{width: '100%'}" />
+                <label for="hr">Humedad Relativa %</label>
+            </p-floatLabel>
+            <div class="color-picker-container">
+                <p-colorPicker formControlName="color" />
+                <span>{{ color }}</span>
+            </div>
+        </form>
+
+        <p-button label="Agregar" [outlined]="true"
+            [style]="{ padding: '0.25rem', marginTop: '1rem', marginLeft: 'auto' }" (onClick)="calcularPuntos()"
+            [disabled]="formPoints.invalid" />
+
+    </p-panel>
+</div>
