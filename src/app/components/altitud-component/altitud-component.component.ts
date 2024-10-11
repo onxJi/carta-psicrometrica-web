@@ -8,11 +8,12 @@ import { Validaciones } from '../../helpers/validaciones';
 import { CustomTableComponent } from '../../shared/custom-table/custom-table.component';
 import { PsychrometricData } from '../../models/entities/PsychrometricData.model';
 import { PointsService } from '../../services/points.service';
+import { SubirArchivosComponent } from '../../shared/subir-archivos/subir-archivos.component';
 
 @Component({
   selector: 'app-altitud-component',
   standalone: true,
-  imports: [PrimeNgExportModule, ReactiveFormsModule, CustomTableComponent],
+  imports: [PrimeNgExportModule, ReactiveFormsModule, CustomTableComponent, SubirArchivosComponent],
   templateUrl: './altitud-component.component.html',
   styleUrl: './altitud-component.component.css',
   host: {
