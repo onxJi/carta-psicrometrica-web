@@ -12,7 +12,7 @@
   max-width: 100%;
   margin-top: 2rem;
 }
-.color-picker-container{
+.color-picker-container {
   width: 244px;
   display: flex;
   align-items: center;
@@ -20,4 +20,17 @@
   gap: 1rem;
   border-radius: 10px;
   border: solid 1px #c0c0c0;
+}
+
+.bton {
+  background: linear-gradient(90deg, #19bf19, #ebddf7);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  &:hover {
+    background: linear-gradient(90deg, #155aa8, #570b9b);
+  }
 }
