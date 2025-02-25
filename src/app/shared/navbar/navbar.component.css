@@ -88,7 +88,7 @@
   }
 
   .navbar-items.open {
-    height: 150px; /* Ajustar según el número de elementos */
+    height: auto; /* Ajustar según el número de elementos */
   }
 
   .navbar-toggle {

@@ -27,13 +27,13 @@ export default class HomePageComponent implements OnInit {
       label: 'Cartas Psicrométricas',
       url: "/cartas-psicrometricas",
       icon: "assets/icon.svg",
-      description: "Construye cartas psicrometricas a diferentes altitudes y personalizalas como gustes."
+      description: "Construye cartas psicrométricas a diferentes altitudes y temperaturas, con la posibilidad de exportarlas a PDF o PNG"
     },
     {
       label: 'Grafica Delta T (∆T)',
       url: "/deltaT-indicador",
       icon: "assets/icon.svg",
-      description: "Construye la grafica de Delta T (∆T)"
+      description: "Construye la grafica de Delta T (∆T) como indicador del ambiente meteorológico para pulverizaciones."
     }
   ]
 

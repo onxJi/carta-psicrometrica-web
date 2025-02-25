@@ -9,6 +9,7 @@ import { CustomTableComponent } from '../../shared/custom-table/custom-table.com
 import { PsychrometricData } from '../../models/entities/PsychrometricData.model';
 import { PointsService } from '../../services/points.service';
 import { SubirArchivosComponent } from '../../shared/subir-archivos/subir-archivos.component';
+import { style } from '@angular/animations';
 
 @Component({
   selector: 'app-altitud-component',
@@ -31,6 +32,8 @@ export class AltitudComponentComponent {
     hr: [null, Validators.compose([Validators.required, Validaciones.onlyNumbersF])],
     color: ['#000', Validators.required]
   });
+
+  buttonc: any = { text: 'Anexar Archivo' };
 
   get color() {
     return this.formPoints.get('color')?.value

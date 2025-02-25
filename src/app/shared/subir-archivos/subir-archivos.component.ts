@@ -1,25 +1,41 @@
-import { Component, HostListener, input } from '@angular/core';
+import { Component, effect, HostListener, input } from '@angular/core';
 import { PrimeNgExportModule } from '../primengExportModule/PrimeNgExportModule.module';
+import { style } from '@angular/animations';
+import { CommonModule } from '@angular/common';
 
 export interface IconType {
   icon?: string;
-  border?: string; 
+  border?: string;
 }
 
+export interface ButtonType {
+  text: string;
+  style?: { [key: string]: string };
+  class?: string | string[];
+}
 
 
 @Component({
   selector: 'app-subir-archivos',
   standalone: true,
-  imports: [PrimeNgExportModule],
+  imports: [PrimeNgExportModule, CommonModule],
   templateUrl: './subir-archivos.component.html',
-  styleUrl: './subir-archivos.component.css'
+  styleUrl: './subir-archivos.component.css',
 })
 export class SubirArchivosComponent {
 
-  
+
   uploadedFile: File | null = null;
-  color = input<IconType>({ icon: '#007bff'});
+  color = input<IconType>({ icon: '#007bff' });
+  public button = input<ButtonType>({ text: 'Subir archivo' });
+
+  constructor() {
+
+    effect(() => {
+      console.log('File uploaded:', this.button());
+    });
+  }
+
   @HostListener('dragover', ['$event']) onDragOver(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
