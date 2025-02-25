@@ -1,0 +1,35 @@
+.contenedor-contact-page{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center ;
+    width: 100vw;
+    
+}
+
+.contenedor-inf-autor{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 500px), 1fr));
+    gap: 1rem;
+    justify-content: center;
+    justify-items: center;
+    align-items: center;
+}
+
+.img-perfil-contact-page {
+    border-radius: 15px;
+    -webkit-box-shadow: 6px 7px 18px 0px rgba(171,168,175,1);
+    -moz-box-shadow: 6px 7px 18px 0px rgba(171,168,175,1);
+    box-shadow: 6px 7px 18px 0px rgba(171,168,175,1);
+}
+.contenedor-btn-contact-page{
+    display: flex;
+    gap: 1rem;
+}
+.btn-link-contact{
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
